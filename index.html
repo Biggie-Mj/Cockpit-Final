@@ -8,10 +8,10 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black">
   <meta name="apple-mobile-web-app-title" content="Cockpit">
   <title>Cockpit V2 — Préparation D&D 5e</title>
-  <link rel="manifest" href="manifest.webmanifest?v=2.0.7">
+  <link rel="manifest" href="manifest.webmanifest?v=2.0.8">
   <link rel="apple-touch-icon" href="apple-touch-icon.png?v=2.0.2">
   <link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png?v=2.0.2">
-  <link rel="stylesheet" href="styles.css?v=2.0.7">
+  <link rel="stylesheet" href="styles.css?v=2.0.8">
 </head>
 <body>
 
@@ -136,7 +136,7 @@
       <details class="editor-details"><summary>Jeu — danger, gain, conséquence</summary><div class="form-grid three"><label>Danger<textarea name="danger" rows="3"></textarea></label><label>À obtenir<textarea name="reward" rows="3"></textarea></label><label>Si les PJ ne font rien<textarea name="ifIgnored" rows="3"></textarea></label></div></details>
       <details class="editor-details"><summary>Sons — Musique, Ambiance</summary><div class="form-grid three"><label class="span3">Lien Spotify<input name="spotifyUrl" inputmode="url" placeholder="https://open.spotify.com/… ou spotify:…"></label></div></details>
     </div>
-    <details class="editor-details"><summary>Illustration d’arrière-plan</summary><div class="location-background-editor"><label>Importer une image<input id="locationBackgroundFile" type="file" accept="image/png,image/jpeg,image/webp"></label><small>Image optimisée et conservée avec la session.</small><img id="locationBackgroundPreview" alt="Aperçu de l’arrière-plan" hidden><button type="button" id="btnRemoveLocationBackground" class="ghost">Retirer l’illustration</button></div></details>
+    <details class="editor-details"><summary>Illustration d’arrière-plan</summary><div class="location-background-editor"><label>Importer une image<input id="locationBackgroundFile" type="file" accept="image/png,image/jpeg,image/webp"></label><small>Image originale conservée sans réduction de résolution et incluse dans les exports de session.</small><img id="locationBackgroundPreview" alt="Aperçu de l’arrière-plan" hidden><button type="button" id="btnRemoveLocationBackground" class="ghost">Retirer l’illustration</button></div></details>
     <div class="modal-actions"><button type="button" id="btnDeleteLocation" class="danger">Supprimer</button><span></span><button type="button" class="ghost" data-close="locationDialog">Annuler</button><button type="submit" class="primary">Enregistrer</button></div>
   </form></dialog>
 
@@ -205,6 +205,6 @@
   <input id="locationImportFile" type="file" accept=".json,application/json" hidden>
   <input id="illustrationImportFile" type="file" accept="image/png,image/jpeg,.png,.jpg,.jpeg" multiple hidden>
   <dialog id="ambienceDrawer" aria-labelledby="ambienceDrawerTitle"><div class="modal-head"><h2 id="ambienceDrawerTitle">Ambiances</h2><button type="button" class="icon-btn" data-close="ambienceDrawer" aria-label="Fermer les ambiances"><img src="fermer.png" class="ui-icon" alt=""></button></div><div id="ambienceDrawerList"></div><div class="modal-actions"><button id="btnManageAmbiences" class="ghost">Gérer les ambiances</button></div></dialog>
-  <script src="app.js?v=2.0.7"></script>
+  <script src="app.js?v=2.0.8"></script>
 </body>
 </html>

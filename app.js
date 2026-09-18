@@ -1,4 +1,4 @@
-const APP_VERSION='2.0.7';
+const APP_VERSION='2.0.8';
 const STORAGE_KEY='cockpit-v1';
 const LEGACY_KEYS=['dm-cockpit-v05','dm-cockpit-v04','dm-cockpit-v03','dm-cockpit-v02'];
 const BACKUP_KEY='cockpit-v1-backups';
@@ -124,6 +124,8 @@ let recentlyRevealedSecretId=null;
 let homeOpen=true;
 let pendingImportedSession=null;
 let locationBackgroundDraft='';
+let locationBackgroundDbPromise=null;
+let liveBackgroundRenderToken=0;
 let locationBackgroundImportToken=0;
 let activeMusicLocationId=null;
 let sessionTimerInterval=null;
@@ -306,7 +308,7 @@ function renderTableLocations(){
   $$('[data-preview-location]').forEach(b=>b.onclick=()=>{state.previewLocationId=b.dataset.previewLocation;persist();renderTable()});
 }
 function renderLiveLocation(l){
-  const panel=$('#liveLocationContent').parentElement;const background=safeLocationBackground(l?.backgroundImage);panel.classList.toggle('has-location-background',!!background);panel.style.setProperty('--location-background',background?`url("${background}")`:'none');
+  renderLocationBackground(l?.backgroundImage);
   const el=$('#liveLocationContent');if(!l){el.innerHTML=`<div class="live-empty"><div><span class="eyebrow">TABLE</span><h2>Aucun lieu</h2><button id="emptyLocationBtn" class="primary">${uiIcon('plus','ui-icon button-ui-icon')} Créer un lieu</button></div></div>`;$('#emptyLocationBtn').onclick=()=>openLocationEditor();return}
   const isCurrent=l.id===state.activeLocationId, visuals=l.visuals||[], npcs=(l.npcIds||[]).map(id=>state.npcs.find(n=>n.id===id)).filter(Boolean);
   const sit=state.situations.filter(x=>x.injected&&x.injectedLocationId===l.id),thr=state.threats.filter(x=>x.injected&&x.injectedLocationId===l.id);
@@ -345,10 +347,11 @@ $$('.context-tab').forEach(b=>{b.classList.toggle('active',b.dataset.context===s
     el.innerHTML=secrets.length?secrets.map(s=>{const revealed=!!s.revealed,recent=recentlyRevealedSecretId===s.id;return `<div class="context-card secret ${revealed?'revealed':''} ${recent?'recently-revealed':''}"><div class="secret-copy"><strong>${esc(s.title)}</strong><small>${esc(s.text)}</small>${revealed?`<span class="secret-method-badge">${methodIcon(s.method)} ${esc(s.method||'Révélé')}</span>`:''}</div>${revealed?'':revealPendingId===s.id?`<div class="reveal-methods"><button data-secret-method="${s.id}|Conversation" title="Conversation">${uiIcon('bulle_dialogue','ui-icon reveal-ui-icon')}</button><button data-secret-method="${s.id}|Observation" title="Observation">${uiIcon('oeil','ui-icon reveal-ui-icon')}</button><button data-secret-method="${s.id}|Document" title="Document">${uiIcon('parchemin','ui-icon reveal-ui-icon')}</button><button data-secret-method="${s.id}|Magie" title="Magie">${uiIcon('magie','ui-icon reveal-ui-icon')}</button><button data-secret-method="${s.id}|Déduction des joueurs" title="Déduction">${uiIcon('cerveau','ui-icon reveal-ui-icon')}</button><button data-secret-method="${s.id}|Autre" title="Autre">${uiIcon('etoile','ui-icon reveal-ui-icon')}</button></div>`:`<button class="primary reveal-btn" data-start-reveal="${s.id}">◆ Révéler</button>`}</div>`}).join(''):'<div class="empty-mini">Aucun secret préparé.</div>';
     $$('[data-start-reveal]').forEach(b=>b.onclick=()=>{revealPendingId=b.dataset.startReveal;renderContextPanel()});$$('[data-secret-method]').forEach(b=>b.onclick=()=>{const [id,method]=b.dataset.secretMethod.split('|');revealSecret(id,method)});
   }else if(state.contextTab==='rhythm'){
-    const situationRows=state.situations.map(x=>`<div class="rhythm-row situation ${x.injected?'injected':''}"><span class="rhythm-state">${x.injected?'✓':'○'}</span><span>${esc(x.text)}</span></div>`).join('')||'<div class="empty-mini">Aucune situation.</div>';
-    const threatRows=threats.map(t=>`<div class="rhythm-row threat ${t.injected?'injected':''}"><span class="rhythm-state">${t.injected?'✓':'○'}</span><span><strong>${esc(t.name)}</strong><small>${esc(t.summary||'')}</small></span></div>`).join('')||'<div class="empty-mini">Aucune menace.</div>';
-    el.innerHTML=`<div class="context-toolbar rhythm-toolbar"><span>Situations et menaces prêtes à entrer en jeu</span><button id="btnContextInject" class="primary">${uiIcon('eclair','ui-icon button-ui-icon')} Injecter</button></div><section class="rhythm-section"><h3>SITUATIONS</h3>${situationRows}</section><section class="rhythm-section"><h3>MENACES</h3>${threatRows}</section>`;
-    $('#btnContextInject').onclick=()=>{renderInjection();$('#injectDialog').showModal()};
+    const row=(kind,item,label,detail='')=>`<button type="button" class="rhythm-row ${kind} ${item.injected?'injected':''}" data-rhythm-kind="${kind}" data-rhythm-id="${esc(item.id)}" aria-pressed="${!!item.injected}" title="${item.injected?'Rendre disponible':'Injecter dans le lieu actuel'}"><span class="rhythm-state" aria-hidden="true">${item.injected?'✓':'○'}</span><span>${kind==='threat'?`<strong>${esc(label)}</strong><small>${esc(detail)}</small>`:esc(label)}</span></button>`;
+    const situationRows=state.situations.map(x=>row('situation',x,x.text)).join('')||'<div class="empty-mini">Aucune situation.</div>';
+    const threatRows=threats.map(t=>row('threat',t,t.name,t.summary||'')).join('')||'<div class="empty-mini">Aucune menace.</div>';
+    el.innerHTML=`<div class="context-toolbar rhythm-toolbar"><span>Appuyer pour injecter · Appuyer de nouveau pour restaurer</span></div><section class="rhythm-section"><h3>SITUATIONS</h3>${situationRows}</section><section class="rhythm-section"><h3>MENACES</h3>${threatRows}</section>`;
+    $$('[data-rhythm-kind]').forEach(b=>b.onclick=()=>toggleLibraryInjection(b.dataset.rhythmKind,b.dataset.rhythmId));
   }else{
     el.innerHTML=`<div class="context-toolbar"><span>Informations sous les yeux</span><button id="btnAddPin" class="ghost ui-icon-button" aria-label="Épingler une information">${uiIcon('plus','ui-icon button-ui-icon')}</button></div>${state.pins.length?state.pins.map(p=>`<div class="pin-item"><span>${uiIcon('epingle','ui-icon inline-ui-icon')}</span><span>${esc(p.text)}</span><button data-remove-pin="${p.id}">×</button></div>`).join(''):'<div class="empty-mini">Rien d’épinglé.</div>'}`;
     $('#btnAddPin').onclick=()=>openGenericEditor('pin');$$('[data-remove-pin]').forEach(b=>b.onclick=()=>commit(()=>state.pins=state.pins.filter(p=>p.id!==b.dataset.removePin),null));
@@ -525,14 +528,17 @@ function archiveCurrentForSafety(){
 }
 function createNewSession(name){archiveCurrentForSafety();snapshot();state=normalize(EMPTY());state.title=(name||'').trim()||'Nouvelle session';state.view='prep';persist();closeHome();render();toast('Nouvelle session créée')}
 function safeFileName(value){return String(value||'session').normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-zA-Z0-9-_]+/g,'-').replace(/^-+|-+$/g,'').slice(0,70)||'session'}
-function buildExportPayload(sessionState=state){
+async function buildExportPayload(sessionState=state){
+  sessionState=await embedLocationBackgrounds(sessionState);
   return {format:'cockpit-session',formatVersion:1,appVersion:APP_VERSION,exportedAt:nowStamp(),session:clone({...sessionState,version:APP_VERSION})};
 }
 function downloadBlob(name,blob){const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=name;document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},1000)}
 async function exportSession(){
-  const payload=JSON.stringify(buildExportPayload(),null,2),name=`Cockpit-${safeFileName(state.title)}-${new Date().toISOString().slice(0,10)}.json`,file=new File([payload],name,{type:'application/json'});
+  try{
+  const payload=JSON.stringify(await buildExportPayload(),null,2),name=`Cockpit-${safeFileName(state.title)}-${new Date().toISOString().slice(0,10)}.json`,file=new File([payload],name,{type:'application/json'});
   try{if(navigator.share&&navigator.canShare?.({files:[file]})){await navigator.share({title:`Sauvegarde Cockpit · ${state.title}`,files:[file]});toast('Sauvegarde prête à enregistrer dans Fichiers');return}}catch(err){if(err?.name==='AbortError')return;console.warn(err)}
   downloadBlob(name,file);toast('Sauvegarde exportée');
+  }catch(err){console.error(err);toast('Export impossible : une illustration est indisponible. Réimporte son image avant de réessayer.')}
 }
 function savedSlotExportPayload(slot){
   const exportedState=normalize(clone(slot.state||EMPTY()));
@@ -541,10 +547,12 @@ function savedSlotExportPayload(slot){
   return buildExportPayload(exportedState);
 }
 async function exportSavedSessionSlot(id){
+  try{
   const slot=getSavedSessions().find(x=>x.id===id&&!x.builtInDemo);if(!slot)return toast('Sauvegarde introuvable');
-  const payload=JSON.stringify(savedSlotExportPayload(slot),null,2),date=new Date().toISOString().slice(0,10),name=`Cockpit-Sauvegarde-${safeFileName(slot.name)}-${date}.json`,file=new File([payload],name,{type:'application/json'});
+  const payload=JSON.stringify(await savedSlotExportPayload(slot),null,2),date=new Date().toISOString().slice(0,10),name=`Cockpit-Sauvegarde-${safeFileName(slot.name)}-${date}.json`,file=new File([payload],name,{type:'application/json'});
   try{if(navigator.share&&navigator.canShare?.({files:[file]})){await navigator.share({title:`Exporter · ${slot.name}`,files:[file]});toast('Copie externe prête à enregistrer dans Fichiers');return}}catch(err){if(err?.name==='AbortError')return;console.warn(err)}
   downloadBlob(name,file);toast('Sauvegarde exportée');
+  }catch(err){console.error(err);toast('Export impossible : une illustration est indisponible. Réimporte son image avant de réessayer.')}
 }
 function extractImportedSession(parsed){
   const incoming=parsed?.format==='cockpit-session'&&parsed?.session?parsed.session:parsed?.session&&typeof parsed.session==='object'?parsed.session:parsed;
@@ -579,8 +587,8 @@ function showImportOverwriteChoices(session,name){
   panel.classList.remove('hidden');
   $$('[data-import-overwrite-slot]').forEach(b=>b.onclick=()=>{const target=users.find(x=>x.id===b.dataset.importOverwriteSlot);if(target&&pendingImportedSession&&confirm(`Remplacer « ${target.name} » par « ${pendingImportedSession.name} » ?`))storeImportedSavedSession(pendingImportedSession.session,pendingImportedSession.name,target.id)});
 }
-function importSavedSessionPayload(parsed,fileName=''){
-  const incoming=extractImportedSession(parsed),name=importedSessionName(incoming,fileName);
+async function importSavedSessionPayload(parsed,fileName=''){
+  const incoming=await storeLocationBackgrounds(extractImportedSession(parsed)),name=importedSessionName(incoming,fileName);
   if(userSavedSessions().length>=MAX_SAVED_SESSIONS){showImportOverwriteChoices(incoming,name);return {status:'needs-overwrite',name}}
   storeImportedSavedSession(incoming,name);
   return {status:'imported',name};
@@ -590,7 +598,7 @@ async function importSavedSessionFile(file){
   return importSavedSessionPayload(parsed,file.name||'');
 }
 async function importSessionFile(file){
-  const parsed=JSON.parse(await file.text()),incoming=extractImportedSession(parsed);
+  const parsed=JSON.parse(await file.text()),incoming=await storeLocationBackgrounds(extractImportedSession(parsed));
   archiveCurrentForSafety();snapshot();state=normalize(clone(incoming));state.saveSlotId=null;persist();closeHome();render();toast('Sauvegarde importée');
 }
 
@@ -604,7 +612,7 @@ function parseLocationImport(parsed){
   return raw.map(l=>({id:uid('l'),name:String(l?.name||'').trim(),tier:l?.tier==='reserve'?'reserve':'main',status:'unvisited',concept:String(l?.concept||'').trim(),visuals:Array.isArray(l?.visuals)?l.visuals.map(x=>String(x).trim()).filter(Boolean):lines(l?.visuals),impulse:String(l?.impulse||'').trim(),situation:String(l?.situation||'').trim(),faction:String(l?.faction||'').trim(),localPlot:String(l?.localPlot||'').trim(),regionalPlot:String(l?.regionalPlot||'').trim(),mainPlot:String(l?.mainPlot||'').trim(),danger:String(l?.danger||'').trim(),reward:String(l?.reward||'').trim(),ifIgnored:String(l?.ifIgnored||'').trim(),spotifyUrl:String(l?.spotifyUrl||'').trim(),backgroundImage:safeLocationBackground(l?.backgroundImage),npcIds:[]})).filter(l=>l.name);
 }
 async function importNpcFile(file){const parsed=JSON.parse(await file.text()),items=parseNpcImport(parsed);if(!items.length)throw new Error('Aucun PNJ valide');commit(()=>{state.npcs.push(...items);state.libraryTab='npcs'},`${items.length} PNJ importé${items.length>1?'s':''}`);if($('#npcDialog')?.open)$('#npcDialog').close();if(state.view==='library')renderLibrary()}
-async function importLocationFile(file){const parsed=JSON.parse(await file.text()),items=parseLocationImport(parsed);if(!items.length)throw new Error('Aucun lieu valide');commit(()=>{state.locations.push(...items);state.previewLocationId=items[0].id;state.libraryTab='locations'},`${items.length} lieu${items.length>1?'x':''} importé${items.length>1?'s':''}`);if($('#locationDialog')?.open)$('#locationDialog').close();if(state.view==='library')renderLibrary()}
+async function importLocationFile(file){const parsed=JSON.parse(await file.text()),items=parseLocationImport(parsed);if(!items.length)throw new Error('Aucun lieu valide');await storeLocationBackgrounds({locations:items});commit(()=>{state.locations.push(...items);state.previewLocationId=items[0].id;state.libraryTab='locations'},`${items.length} lieu${items.length>1?'x':''} importé${items.length>1?'s':''}`);if($('#locationDialog')?.open)$('#locationDialog').close();if(state.view==='library')renderLibrary()}
 
 // ===== V2 · Illustrations locales (IndexedDB, hors sauvegardes JSON) =====
 const ILLUSTRATION_DB_NAME='cockpit-illustrations-v2';
@@ -760,7 +768,7 @@ $('#importFile').onchange=async e=>{const file=e.target.files[0];if(!file)return
 $('#btnDeleteIllustrations').onclick=openIllustrationDeleteDialog;$('#btnAddIllustrationCategory').onclick=openIllustrationCategoryDialog;$('#btnMoveIllustrations').onclick=toggleIllustrationMoveMode;$('#btnImportIllustrations').onclick=openIllustrationImporter;$('#btnExportIllustrations').onclick=exportSelectedIllustrations;$('#btnCancelDeleteIllustrations').onclick=()=>$('#illustrationDeleteDialog').close();$('#btnConfirmDeleteIllustrations').onclick=confirmDeleteSelectedIllustrations;$('#illustrationImportFile').onchange=e=>{prepareIllustrationImport(e.target.files);e.target.value=''};$('#illustrationImportForm').onsubmit=async e=>{e.preventDefault();try{await savePendingIllustrations()}catch(err){console.error(err);toast('Impossible d’importer ces illustrations')}};$('#illustrationImportDialog').addEventListener('close',()=>{pendingIllustrationFiles=[]});$('#illustrationCategoryForm').onsubmit=async e=>{e.preventDefault();await createIllustrationCategory(new FormData(e.target).get('name'))};
 
 ensureDemoSavedSession();
-if('serviceWorker' in navigator)window.addEventListener('load',async()=>{try{const reg=await navigator.serviceWorker.register('service-worker.js?v=2.0.7',{updateViaCache:'none'});await reg.update()}catch(e){console.warn('Service worker',e)}});
+if('serviceWorker' in navigator)window.addEventListener('load',async()=>{try{const reg=await navigator.serviceWorker.register('service-worker.js?v=2.0.8',{updateViaCache:'none'});await reg.update()}catch(e){console.warn('Service worker',e)}});
 render();
 
 
@@ -777,9 +785,52 @@ function bindAmbiencePlayback(){
 function renderAmbienceDrawer(){
   $('#ambienceDrawerList').innerHTML=state.ambiences.length?state.ambiences.map(a=>`<div class="ambience-row"><strong>${esc(a.name)}</strong>${ambiencePlayButton(a)}</div>`).join(''):'<p class="empty-mini">Ajoute tes ambiances dans Composants → Ambiances.</p>';bindAmbiencePlayback();
 }
-function safeLocationBackground(value){return typeof value==='string'&&/^data:image\/(jpeg|png|webp);base64,[A-Za-z0-9+/=]+$/.test(value)?value:''}
+// Originals live in IndexedDB; sessions keep small references. Exports embed the bytes.
+function isEmbeddedBackground(value){return typeof value==='string'&&/^data:image\/(jpeg|png|webp);base64,[A-Za-z0-9+/=]+$/.test(value)}
+function safeLocationBackground(value){return isEmbeddedBackground(value)||(typeof value==='string'&&/^cockpit-background:[a-zA-Z0-9-]+$/.test(value))?value:''}
+function openLocationBackgroundDb(){
+  if(locationBackgroundDbPromise)return locationBackgroundDbPromise;
+  locationBackgroundDbPromise=new Promise((resolve,reject)=>{
+    const request=indexedDB.open('cockpit-location-backgrounds-v1',1);
+    request.onupgradeneeded=()=>request.result.createObjectStore('images',{keyPath:'id'});
+    request.onsuccess=()=>{const db=request.result;db.onversionchange=()=>{db.close();locationBackgroundDbPromise=null};resolve(db)};
+    request.onerror=()=>reject(request.error||new Error('Stockage des illustrations indisponible'));
+  }).catch(err=>{locationBackgroundDbPromise=null;throw err});
+  return locationBackgroundDbPromise;
+}
+async function storeLocationBackground(data){
+  if(!isEmbeddedBackground(data))throw new Error('Image incompatible');
+  const db=await openLocationBackgroundDb(),id='cockpit-background:'+uid('bg');
+  await new Promise((resolve,reject)=>{const tx=db.transaction('images','readwrite');tx.objectStore('images').put({id,data});tx.oncomplete=resolve;tx.onerror=()=>reject(tx.error);tx.onabort=()=>reject(tx.error||new Error('Enregistrement interrompu'))});
+  return id;
+}
+async function resolveLocationBackground(value){
+  const safe=safeLocationBackground(value);if(!safe)return '';if(isEmbeddedBackground(safe))return safe;
+  const db=await openLocationBackgroundDb();
+  return new Promise((resolve,reject)=>{const tx=db.transaction('images','readonly'),req=tx.objectStore('images').get(safe);req.onsuccess=()=>{const data=req.result?.data;if(isEmbeddedBackground(data))resolve(data);else reject(new Error('Illustration introuvable'))};req.onerror=()=>reject(req.error);tx.onabort=()=>reject(tx.error||new Error('Lecture interrompue'))});
+}
+async function embedLocationBackgrounds(session){
+  const copy=clone(session);for(const l of copy.locations||[])if(l.backgroundImage)l.backgroundImage=await resolveLocationBackground(l.backgroundImage);return copy;
+}
+async function storeLocationBackgrounds(session){
+  const stored=new Map();for(const l of session.locations||[]){
+    const value=safeLocationBackground(l.backgroundImage);if(!value){l.backgroundImage='';continue}
+    if(isEmbeddedBackground(value)){if(!stored.has(value))stored.set(value,await storeLocationBackground(value));l.backgroundImage=stored.get(value)}
+    else await resolveLocationBackground(value);
+  }return session;
+}
+async function renderLocationBackground(value){
+  const panel=$('#liveLocationContent').parentElement,reference=safeLocationBackground(value);
+  if(panel.dataset.backgroundReference===reference)return;
+  panel.dataset.backgroundReference=reference;const token=++liveBackgroundRenderToken;
+  panel.classList.remove('has-location-background');panel.style.setProperty('--location-background','none');
+  if(!reference)return;
+  try{const data=await resolveLocationBackground(reference);if(token!==liveBackgroundRenderToken)return;panel.style.setProperty('--location-background',`url("${data}")`);panel.classList.add('has-location-background')}
+  catch(err){if(token===liveBackgroundRenderToken){delete panel.dataset.backgroundReference;toast('Illustration indisponible : réimporte-la depuis Modifier le lieu.')}console.warn(err)}
+}
 function setLocationBackgroundDraft(value){
-  locationBackgroundImportToken++;locationBackgroundDraft=safeLocationBackground(value);const preview=$('#locationBackgroundPreview');preview.hidden=!locationBackgroundDraft;if(locationBackgroundDraft)preview.src=locationBackgroundDraft;else preview.removeAttribute('src');$('#btnRemoveLocationBackground').hidden=!locationBackgroundDraft;$('#locationForm button[type="submit"]').disabled=false;
+  const token=++locationBackgroundImportToken;locationBackgroundDraft=safeLocationBackground(value);const preview=$('#locationBackgroundPreview');preview.hidden=true;preview.removeAttribute('src');$('#btnRemoveLocationBackground').hidden=!locationBackgroundDraft;$('#locationForm button[type="submit"]').disabled=false;
+  if(locationBackgroundDraft)resolveLocationBackground(locationBackgroundDraft).then(data=>{if(token!==locationBackgroundImportToken)return;preview.src=data;preview.hidden=false}).catch(()=>{if(token===locationBackgroundImportToken)toast('Aperçu indisponible : réimporte cette illustration')});
 }
 async function importLocationBackground(e){
   const file=e.target.files[0];if(!file)return;
@@ -788,11 +839,11 @@ async function importLocationBackground(e){
   try{
     if(!/^image\/(png|jpeg|webp)$/.test(file.type))throw new Error('Choisis une image PNG, JPEG ou WebP');
     const img=new Image();img.src=url;await img.decode();
-    const canvas=document.createElement('canvas');let scale=Math.min(1,1400/Math.max(img.naturalWidth,img.naturalHeight)),data='';
-    for(let i=0;i<8;i++){canvas.width=Math.max(1,Math.round(img.naturalWidth*scale));canvas.height=Math.max(1,Math.round(img.naturalHeight*scale));canvas.getContext('2d').drawImage(img,0,0,canvas.width,canvas.height);data=canvas.toDataURL('image/jpeg',.78);if(data.length<=110000)break;scale*=.8}
-    if(data.length>110000)throw new Error('Cette image est trop volumineuse');
-    if(token===locationBackgroundImportToken)setLocationBackgroundDraft(data);
-  }catch(err){if(token===locationBackgroundImportToken)toast(err.message||'Impossible de lire cette image')}
+    const data=await new Promise((resolve,reject)=>{const reader=new FileReader();reader.onload=()=>resolve(reader.result);reader.onerror=()=>reject(new Error('Impossible de lire cette image'));reader.readAsDataURL(file)});
+    if(token!==locationBackgroundImportToken)return;
+    const reference=await storeLocationBackground(data);
+    if(token===locationBackgroundImportToken)setLocationBackgroundDraft(reference);
+  }catch(err){if(token===locationBackgroundImportToken)toast(err?.name==='QuotaExceededError'?'Stockage de l’appareil plein : impossible d’ajouter cette image.':err.message||'Impossible de lire cette image')}
   finally{URL.revokeObjectURL(url);if(token===locationBackgroundImportToken)submit.disabled=false}
 }
 

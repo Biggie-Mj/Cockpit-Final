@@ -302,3 +302,8 @@ button,.location-tile,.rail-location,.ammo-line,.prep-secret,.context-card,.libr
 .has-location-background .live-hero{background:rgba(25,19,15,.68)}
 .has-location-background .live-core article{background:rgba(17,14,12,.78)}
 .has-location-background .live-core .impulse{background:rgba(28,20,14,.78)}
+
+/* Rythme : la ligne entière injecte ou restaure l’élément. */
+button.rhythm-row{width:100%;text-align:left;min-height:44px;font-weight:inherit;cursor:pointer;white-space:normal}
+button.rhythm-row:focus-visible{outline:2px solid #d7ae6c;outline-offset:2px}
+button.rhythm-row:active{filter:brightness(1.18)}
