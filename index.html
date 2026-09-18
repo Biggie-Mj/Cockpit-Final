@@ -1,0 +1,210 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#0b2f21">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="apple-mobile-web-app-title" content="Cockpit">
+  <title>Cockpit V2 — Préparation D&D 5e</title>
+  <link rel="manifest" href="manifest.webmanifest?v=2.0.7">
+  <link rel="apple-touch-icon" href="apple-touch-icon.png?v=2.0.2">
+  <link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png?v=2.0.2">
+  <link rel="stylesheet" href="styles.css?v=2.0.7">
+</head>
+<body>
+
+  <main id="homeView" class="home-screen">
+    <div class="home-shade"></div>
+    <section class="home-panel" aria-label="Menu principal Cockpit">
+      <div class="home-brand-row"><img src="icon-192.png?v=2.0.2" alt=""><div><span class="eyebrow">COCKPIT · V2</span><h1>Préparez. Pilotez. Improvisez.</h1></div></div>
+      <p class="home-copy">Votre console de préparation et de suivi de session D&amp;D 5e, pensée pour l’iPad.</p>
+      <div class="home-actions">
+        <button id="btnHomeResume" class="home-primary"><span>Reprendre la dernière session</span><small id="homeResumeTitle">Aucune session en cours</small></button>
+        <button id="btnHomeNew" class="home-secondary"><span class="home-action-icon"><img src="plus.png" class="ui-icon home-ui-icon" alt=""></span><span><strong>Créer une nouvelle session</strong><small>Commencer une préparation vierge</small></span></button>
+        <button id="btnHomeImport" class="home-secondary"><span class="home-action-icon"><img src="fleche_bas.png" class="nav-ui-icon home-ui-icon" alt="" aria-hidden="true"></span><span><strong>Importer une sauvegarde</strong><small>Ouvrir un fichier Cockpit depuis Fichiers</small></span></button>
+      </div>
+      <div class="home-foot"><span>Disponible hors ligne une fois installée.</span><button id="btnHomeSessions" class="home-link">Sessions sauvegardées</button></div>
+    </section>
+  </main>
+
+  <div id="toast" class="toast" aria-live="polite"></div>
+  <div id="sheetScrim" class="sheet-scrim hidden"></div>
+
+  <header class="topbar">
+    <div class="brand-zone"><div id="btnHome" class="brand" role="button" tabindex="0" title="Menu principal"><div class="brand-mark"><img src="icon-64.png?v=2.0.2" alt=""></div><div><h1>COCKPIT</h1><p>SLY FLOURISH · V2</p></div></div><div id="sessionTimer" class="session-timer hidden" aria-label="Durée de la session"><button id="btnSessionTimer" class="session-timer-toggle" type="button" title="Mettre le compteur en pause" aria-label="Mettre le compteur en pause"><img src="sablier.png" alt=""></button><span id="sessionTimerDisplay" class="session-timer-display">0:00:00</span><button id="btnStopSessionTimer" class="timer-stop danger hidden" type="button">STOP</button></div></div>
+    <div class="session-title-wrap"><span class="eyebrow">SESSION</span><div class="session-title-music"><input id="sessionTitle" class="session-title" aria-label="Titre de la session"><button id="btnAmbiences" class="icon-btn" aria-label="Ouvrir les ambiances" aria-haspopup="dialog" aria-controls="ambienceDrawer"><img src="music-note.png" class="ui-icon" alt=""></button></div></div>
+    <div class="top-actions">
+      <button id="btnSearch" class="ghost icon-only ui-icon-button" title="Rechercher" aria-label="Rechercher"><img src="loupe.png" class="ui-icon top-ui-icon" alt=""></button>
+      <span id="saveStatus" class="save-status"><img src="coche.png" class="ui-icon status-ui-icon" alt=""> Sauvegardé</span>
+      <button id="btnUndo" class="ghost ui-icon-button" title="Annuler" aria-label="Annuler"><img src="annuler.png" class="ui-icon top-ui-icon" alt=""></button>
+      <button id="btnMore" class="ghost icon-only ui-icon-button" title="Outils" aria-label="Outils"><img src="menu_trois_points.png" class="ui-icon top-ui-icon" alt=""></button>
+    </div>
+    <div id="moreMenu" class="more-menu hidden">
+      <button id="btnSessions">Sessions sauvegardées</button>
+      <button id="btnBackups">Backups de sécurité</button>
+      <button id="btnClear" class="danger">Nouvelle préparation vide</button>
+    </div>
+  </header>
+
+  <section id="playerRibbon" class="player-ribbon"></section>
+
+  <main id="prepView" class="view-shell prep-shell">
+    <section class="prep-topline">
+      <div><span class="eyebrow">PRÉPARATION DE SESSION</span><h2>Une page. Des possibilités. Aucun chemin imposé.</h2></div>
+      <button id="btnLaunchSession" class="launch-btn"><img src="jouer.png" class="ui-icon button-ui-icon" alt=""> Lancer la session</button>
+    </section>
+    <section class="prep-grid-v3">
+      <div class="prep-stack">
+        <article class="prep-card"><header class="card-head"><div><span class="eyebrow">DIRECTION DU MONDE</span><h2>Fil rouge</h2></div><button class="edit-btn" data-edit="thread">Modifier</button></header><div id="threadCard" class="card-body"></div></article>
+        <article class="prep-card"><header class="card-head"><div><span class="eyebrow">DÉMARRAGE</span><h2>Strong Start</h2></div><button class="edit-btn" data-edit="strong">Modifier</button></header><div id="strongCard" class="card-body"></div></article>
+      </div>
+      <article class="prep-card locations-card"><header class="card-head"><div><span class="eyebrow">ESPACE DE JEU</span><h2>Lieux vivants</h2></div><button id="btnAddLocation" class="primary"><img src="plus.png" class="ui-icon button-ui-icon" alt=""> Lieu</button></header><div id="prepLocations" class="location-board"></div></article>
+      <div class="prep-stack">
+        <article class="prep-card"><header class="card-head"><div><span class="eyebrow">SI LE RYTHME TOMBE</span><h2>Situations</h2></div><button class="primary ui-icon-button" data-add="situation" aria-label="Ajouter une situation"><img src="plus.png" class="ui-icon button-ui-icon" alt=""></button></header><div id="situationsCard" class="ammo-list"></div></article>
+        <article class="prep-card"><header class="card-head"><div><span class="eyebrow">RESSOURCES</span><h2>Composants</h2></div></header><div id="prepResources" class="resource-summary-grid"></div></article>
+      </div>
+      <article class="prep-card secrets-card-v3"><header class="card-head"><div><span class="eyebrow">FILET DE SÉCURITÉ</span><h2>Secrets & indices <span id="prepSecretCount" class="muted-count"></span></h2></div><button class="primary" data-add="secret"><img src="plus.png" class="ui-icon button-ui-icon" alt=""> Secret</button></header><div id="prepSecrets" class="prep-secret-grid"></div></article>
+    </section>
+  </main>
+
+  <main id="tableView" class="view-shell table-shell hidden">
+    <aside class="left-rail panel">
+      <button id="tableStrongStart" class="table-strong-start"></button>
+      <div class="rail-title"><div><span class="eyebrow">OÙ SOMMES-NOUS ?</span><h2>Lieux</h2></div><button id="btnTableAddLocation" class="icon-btn ui-icon-button" aria-label="Ajouter un lieu"><img src="plus.png" class="ui-icon button-ui-icon" alt=""></button></div>
+      <div id="tableLocationList" class="table-location-list"></div>
+      <div class="rail-split"></div>
+      <section class="table-thread">
+        <div class="rail-title"><div><span class="eyebrow">DIRECTION DU MONDE</span><h2>Fil rouge</h2></div></div>
+        <div id="tableThread"></div>
+      </section>
+    </aside>
+
+    <section class="live-location panel"><div id="liveLocationContent"></div></section>
+
+    <aside class="right-rail panel">
+      <div class="context-tabs">
+        <button class="context-tab active" data-context="npcs"><span>PNJ</span><i>0</i></button>
+        <button class="context-tab" data-context="secrets"><span>Secrets</span><i>0</i></button>
+        <button class="context-tab" data-context="rhythm"><span>Rythme</span><i>0</i></button>
+        <button class="context-tab" data-context="pins"><span>Épinglés</span><i>0</i></button>
+      </div>
+      <div id="contextContent" class="context-content"></div>
+    </aside>
+  </main>
+
+  <main id="libraryView" class="view-shell library-shell hidden"><section class="library-panel panel"><div class="library-tabs"><button class="library-tab active" data-library="secrets">Secrets</button><button class="library-tab" data-library="npcs">PNJ</button><button class="library-tab" data-library="locations">Lieux</button><button class="library-tab" data-library="threats">Menaces</button><button class="library-tab" data-library="situations">Situations</button><button class="library-tab" data-library="rewards">Récompenses</button><button class="library-tab" data-library="blanks">Blancs</button><button class="library-tab" data-library="ambiences">Ambiances</button></div><div id="libraryContent" class="library-content"></div></section></main>
+  <main id="journalView" class="view-shell journal-shell hidden"><section class="journal-panel panel"><div class="panel-head"><div><span class="eyebrow">CE QUI EST DEVENU VRAI</span><h2>Journal de session</h2></div><div class="journal-head-actions"><button id="btnExportJournal" class="ghost">Export</button><button id="btnClearJournal" class="ghost">Effacer</button></div></div><div id="journalContent" class="journal-content"></div></section></main>
+  <main id="illustrationsView" class="view-shell illustrations-shell hidden">
+    <section class="illustrations-panel panel">
+      <div class="panel-head illustrations-head">
+        <div><span class="eyebrow">AIDES VISUELLES</span><h2>Illustrations</h2><p class="illustrations-hint">Images conservées localement sur cet iPad · non incluses dans les sauvegardes JSON.</p></div>
+        <div class="illustrations-head-actions">
+          <span id="illustrationSelectionMeta" class="illustration-selection-meta">Aucune sélection</span>
+          <button id="btnDeleteIllustrations" class="danger illustration-delete-btn" disabled>Supprimer</button>
+          <button id="btnAddIllustrationCategory" class="illustration-category-btn"><img src="plus.png" class="ui-icon button-ui-icon" alt=""> Catégorie</button>
+          <button id="btnMoveIllustrations" class="illustration-move-btn" disabled>Déplacer</button>
+          <button id="btnImportIllustrations" class="violet"><img src="fleche_bas.png" class="ui-icon button-ui-icon" alt="" aria-hidden="true"> Importer</button>
+          <button id="btnExportIllustrations" class="violet" disabled><img src="fleche_haut.png" class="ui-icon button-ui-icon" alt="" aria-hidden="true"> Exporter</button>
+        </div>
+      </div>
+      <div id="illustrationsContent" class="illustrations-content"><div class="journal-empty">Chargement des illustrations…</div></div>
+    </section>
+  </main>
+
+  <nav class="bottom-nav" aria-label="Navigation principale">
+    <button class="nav-btn active" data-view="prep"><span><img src="parchemin.png" class="nav-ui-icon" alt=""></span><b>PRÉPARER</b></button>
+    <button class="nav-btn" data-view="table"><span><img src="d20.png" class="nav-ui-icon" alt=""></span><b>TABLE</b></button>
+    <button class="nav-btn" data-view="library"><span><img src="rouage.png" class="nav-ui-icon" alt=""></span><b>COMPOSANTS</b></button>
+    <button class="nav-btn" data-view="journal"><span><img src="grimoire.png" class="nav-ui-icon" alt=""></span><b>JOURNAL</b></button>
+    <button class="nav-btn" data-view="illustrations"><span><img src="oeil.png" class="nav-ui-icon" alt=""></span><b>ILLUSTRATIONS</b></button>
+    <button id="btnQuickNote" class="nav-btn note-nav"><span><img src="plume.png" class="nav-ui-icon" alt=""></span><b>NOTE</b></button>
+  </nav>
+
+  <aside id="npcSheet" class="npc-sheet"><button id="btnCloseNpcSheet" class="sheet-close ui-icon-button" aria-label="Fermer"><img src="fermer.png" class="ui-icon close-ui-icon" alt=""></button><div id="npcSheetContent"></div></aside>
+
+  <dialog id="locationDialog" class="modal wide-modal"><form id="locationForm">
+    <div class="modal-head"><div><span class="eyebrow">LIEU VIVANT</span><h2 id="locationDialogTitle">Lieu</h2><p id="locationEditorHint" class="dialog-hint"></p></div><div class="modal-head-actions"><button type="button" id="btnImportLocationFromEditor" class="ghost import-head-btn"><img src="fleche_bas.png" class="ui-icon button-ui-icon" alt="" aria-hidden="true"> Importer un lieu</button><button type="button" class="icon-btn" data-close="locationDialog"><img src="fermer.png" class="ui-icon close-ui-icon" alt=""></button></div></div>
+    <div class="form-grid three location-essential">
+      <label class="span2">Nom<input name="name" required></label><label>Type<select name="tier"><option value="main">Principal</option><option value="reserve">Réserve</option></select></label>
+      <label class="span3">Concept<input name="concept" placeholder="Une phrase"></label><label class="span3">Situation actuelle<textarea name="situation" rows="3"></textarea></label>
+    </div>
+    <div id="mainLocationFields">
+      <div class="form-grid three"><label class="span2">3 détails visibles <small>Une ligne = un détail</small><textarea name="visuals" rows="4"></textarea></label><label>Impulsion<textarea name="impulse" rows="4"></textarea></label></div>
+      <details class="editor-details"><summary>Contexte — faction et intrigues</summary><div class="form-grid three"><label>Faction<input name="faction"></label><label>Intrigue locale<textarea name="localPlot" rows="3"></textarea></label><label>Intrigue régionale<textarea name="regionalPlot" rows="3"></textarea></label><label class="span3">Trace du fil rouge<textarea name="mainPlot" rows="3"></textarea></label></div></details>
+      <details class="editor-details"><summary>Jeu — danger, gain, conséquence</summary><div class="form-grid three"><label>Danger<textarea name="danger" rows="3"></textarea></label><label>À obtenir<textarea name="reward" rows="3"></textarea></label><label>Si les PJ ne font rien<textarea name="ifIgnored" rows="3"></textarea></label></div></details>
+      <details class="editor-details"><summary>Sons — Musique, Ambiance</summary><div class="form-grid three"><label class="span3">Lien Spotify<input name="spotifyUrl" inputmode="url" placeholder="https://open.spotify.com/… ou spotify:…"></label></div></details>
+    </div>
+    <details class="editor-details"><summary>Illustration d’arrière-plan</summary><div class="location-background-editor"><label>Importer une image<input id="locationBackgroundFile" type="file" accept="image/png,image/jpeg,image/webp"></label><small>Image optimisée et conservée avec la session.</small><img id="locationBackgroundPreview" alt="Aperçu de l’arrière-plan" hidden><button type="button" id="btnRemoveLocationBackground" class="ghost">Retirer l’illustration</button></div></details>
+    <div class="modal-actions"><button type="button" id="btnDeleteLocation" class="danger">Supprimer</button><span></span><button type="button" class="ghost" data-close="locationDialog">Annuler</button><button type="submit" class="primary">Enregistrer</button></div>
+  </form></dialog>
+
+  <dialog id="npcDialog" class="modal"><form id="npcForm"><div class="modal-head"><div><span class="eyebrow">PNJ MOTEUR</span><h2 id="npcDialogTitle">PNJ</h2></div><div class="modal-head-actions"><button type="button" id="btnImportNpcFromEditor" class="ghost import-head-btn"><img src="fleche_bas.png" class="ui-icon button-ui-icon" alt="" aria-hidden="true"> Importer un PNJ</button><button type="button" class="icon-btn" data-close="npcDialog"><img src="fermer.png" class="ui-icon close-ui-icon" alt=""></button></div></div><div class="form-grid"><label>Nom<input name="name" required></label><label>Rôle / sous-titre<input name="role"></label><label class="span2">Identité<input name="identity"></label><label>Veut<textarea name="wants" rows="3"></textarea></label><label>Craint<textarea name="fears" rows="3"></textarea></label><label>Sait<textarea name="knows" rows="3"></textarea></label><label>Cache<textarea name="hides" rows="3"></textarea></label><label class="span2">Trait de jeu<textarea name="trait" rows="3"></textarea></label></div><div class="modal-actions"><button type="button" id="btnDeleteNpc" class="danger">Supprimer</button><span></span><button type="button" class="ghost" data-close="npcDialog">Annuler</button><button type="submit" class="primary">Enregistrer</button></div></form></dialog>
+
+  <dialog id="threadDialog" class="modal"><form id="threadForm"><div class="modal-head"><div><span class="eyebrow">FIL ROUGE</span><h2>Direction du monde</h2></div><button type="button" class="icon-btn" data-close="threadDialog"><img src="fermer.png" class="ui-icon close-ui-icon" alt=""></button></div><div class="form-grid"><label class="span2">Que cherche la force active ?<textarea name="goal" rows="4"></textarea></label><label class="span2">Si les PJ ne font rien <small>Une ligne = une étape logique</small><textarea name="steps" rows="6"></textarea></label></div><div class="modal-actions"><span></span><span></span><button type="button" class="ghost" data-close="threadDialog">Annuler</button><button type="submit" class="primary">Enregistrer</button></div></form></dialog>
+  <dialog id="strongDialog" class="modal"><form id="strongForm"><div class="modal-head"><div><span class="eyebrow">STRONG START</span><h2>Démarrer en mouvement</h2></div><button type="button" class="icon-btn" data-close="strongDialog"><img src="fermer.png" class="ui-icon close-ui-icon" alt=""></button></div><label class="solo-label">Situation initiale<textarea name="text" rows="8"></textarea></label><div class="modal-actions"><span></span><span></span><button type="button" class="ghost" data-close="strongDialog">Annuler</button><button type="submit" class="primary">Enregistrer</button></div></form></dialog>
+  <dialog id="playersDialog" class="modal"><form id="playersForm"><div class="modal-head"><div><span class="eyebrow">PERSONNAGES</span><h2>Spotlights</h2></div><button type="button" class="icon-btn" data-close="playersDialog"><img src="fermer.png" class="ui-icon close-ui-icon" alt=""></button></div><div id="playersEditor" class="players-editor"></div><button type="button" id="btnAddPlayerRow" class="ghost dialog-inline-add"><img src="plus.png" class="ui-icon button-ui-icon" alt=""> Ajouter un personnage</button><div class="modal-actions"><span></span><span></span><button type="button" class="ghost" data-close="playersDialog">Annuler</button><button type="submit" class="primary">Enregistrer</button></div></form></dialog>
+  <dialog id="genericDialog" class="modal"><form id="genericForm"><div class="modal-head"><div><span id="genericEyebrow" class="eyebrow">COMPOSANT</span><h2 id="genericDialogTitle">Élément</h2></div><button type="button" class="icon-btn" data-close="genericDialog"><img src="fermer.png" class="ui-icon close-ui-icon" alt=""></button></div><div id="genericFields" class="form-grid"></div><div class="modal-actions"><button type="button" id="btnDeleteGeneric" class="danger">Supprimer</button><span></span><button type="button" class="ghost" data-close="genericDialog">Annuler</button><button type="submit" class="primary">Enregistrer</button></div></form></dialog>
+
+  <dialog id="spotlightDialog" class="modal compact-modal"><form id="spotlightForm">
+    <div class="modal-head"><div><span class="eyebrow">SPOTLIGHT PJ</span><h2 id="spotlightDialogTitle">Personnage</h2><p id="spotlightDialogCount" class="dialog-hint"></p></div><button type="button" class="icon-btn" data-close="spotlightDialog"><img src="fermer.png" class="ui-icon close-ui-icon" alt=""></button></div>
+    <div id="spotlightIdeaRows" class="spotlight-idea-rows"></div>
+    <button type="button" id="btnAddSpotlightIdea" class="ghost dialog-inline-add"><img src="plus.png" class="ui-icon button-ui-icon" alt=""> Ajouter une idée pour le faire briller</button>
+    <div class="modal-actions"><span></span><span></span><button type="button" class="ghost" data-close="spotlightDialog">Annuler</button><button type="submit" class="primary">Enregistrer</button></div>
+  </form></dialog>
+
+  <dialog id="strongStartPlayDialog" class="modal strong-play-modal">
+    <div class="modal-head"><div><span class="eyebrow">STRONG START</span><h2>Démarrer en mouvement</h2></div><button type="button" class="icon-btn" data-close="strongStartPlayDialog"><img src="fermer.png" class="ui-icon close-ui-icon" alt=""></button></div>
+    <div id="strongStartPlayText" class="strong-play-text"></div>
+    <div class="strong-play-actions"><button id="btnPlayStrongStart" class="launch-btn"><img src="etoile.png" class="ui-icon button-ui-icon" alt=""> Joué</button></div>
+  </dialog>
+
+  <dialog id="sessionsDialog" class="modal wide-modal">
+    <div class="modal-head"><div><span class="eyebrow">SESSIONS</span><h2>Préparations et parties sauvegardées</h2><p class="dialog-hint">Une session « en cours » conserve exactement son état pour être reprise plus tard.</p></div><button type="button" class="icon-btn" data-close="sessionsDialog"><img src="fermer.png" class="ui-icon close-ui-icon" alt=""></button></div>
+    <div class="session-save-bar"><input id="sessionSaveName" placeholder="Nom de la session"><button id="btnSaveSession" class="primary"><img src="sauvegarde.png" class="ui-icon button-ui-icon" alt=""> Sauvegarder l’état actuel</button><button id="btnImportSavedSession" class="violet"><img src="fleche_bas.png" class="ui-icon button-ui-icon" alt="" aria-hidden="true"> Importer</button></div>
+    <div class="session-slots-meta"><span id="sessionSlotCount">0 / 15 sauvegardes</span><small>15 emplacements maximum · seuls les emplacements utilisés sont affichés</small></div>
+    <div id="saveChoicePanel" class="save-choice-panel hidden"></div>
+    <div id="savedSessionsList" class="saved-session-list"></div>
+  </dialog>
+
+  <dialog id="illustrationImportDialog" class="modal wide-modal">
+    <form id="illustrationImportForm">
+      <div class="modal-head"><div><span class="eyebrow">ILLUSTRATIONS</span><h2>Classer les images importées</h2><p class="dialog-hint">Choisis une catégorie pour chaque PNG ou JPEG avant de l’ajouter à Cockpit.</p></div><button type="button" class="icon-btn" data-close="illustrationImportDialog"><img src="fermer.png" class="ui-icon close-ui-icon" alt=""></button></div>
+      <div id="illustrationImportRows" class="illustration-import-rows"></div>
+      <div class="modal-actions illustration-import-actions"><span></span><span></span><button type="button" class="ghost" data-close="illustrationImportDialog">Annuler</button><button type="submit" class="violet">Importer les images</button></div>
+    </form>
+  </dialog>
+
+  <dialog id="illustrationDeleteDialog" class="modal compact-modal">
+    <div class="modal-head"><div><span class="eyebrow">ILLUSTRATIONS</span><h2>Supprimer la sélection ?</h2><p id="illustrationDeleteMessage" class="dialog-hint">Les illustrations supprimées pourront être réimportées plus tard.</p></div><button type="button" class="icon-btn" data-close="illustrationDeleteDialog"><img src="fermer.png" class="ui-icon close-ui-icon" alt=""></button></div>
+    <div class="modal-actions illustration-delete-actions"><button type="button" id="btnCancelDeleteIllustrations" class="illustration-no-btn">NON</button><button type="button" id="btnConfirmDeleteIllustrations" class="danger">OUI</button></div>
+  </dialog>
+
+  <dialog id="illustrationCategoryDialog" class="modal compact-modal"><form id="illustrationCategoryForm">
+    <div class="modal-head"><div><span class="eyebrow">ILLUSTRATIONS</span><h2>Nouvelle catégorie</h2><p class="dialog-hint">La catégorie sera ajoutée sous les catégories existantes.</p></div><button type="button" class="icon-btn" data-close="illustrationCategoryDialog"><img src="fermer.png" class="ui-icon close-ui-icon" alt=""></button></div>
+    <label class="solo-label">Nom de la catégorie<input name="name" required maxlength="40" autocomplete="off" placeholder="Ex. Alliés, Cartes, Artefacts…"></label>
+    <div class="modal-actions illustration-category-actions"><span></span><span></span><button type="button" class="ghost" data-close="illustrationCategoryDialog">Annuler</button><button type="submit" class="illustration-category-btn">Créer</button></div>
+  </form></dialog>
+
+  <dialog id="quickNoteDialog" class="modal wide-modal"><form id="quickNoteForm"><div class="modal-head"><div><span class="eyebrow">NOTES DE SESSION</span><h2>Suivi des notes</h2><p class="dialog-hint">Toutes les notes prises pendant cette session restent visibles ici.</p></div><button type="button" class="icon-btn" data-close="quickNoteDialog"><img src="fermer.png" class="ui-icon close-ui-icon" alt=""></button></div><div class="quick-note-form"><textarea name="text" rows="4" placeholder="Ce qui devient vrai à la table…"></textarea><select name="type"><option value="note">Note</option><option value="decision">⚑ Décision</option><option value="quote">💬 Citation</option><option value="question">❓ Question</option><option value="death">💀 Mort</option><option value="loot">🎁 Butin</option><option value="lead">🔗 Piste</option></select><button type="submit" class="primary quick-note-submit">Ajouter</button></div><div class="note-history-head"><span class="eyebrow">DÉJÀ NOTÉ</span><strong>Historique de la session</strong></div><div id="quickNoteHistory" class="quick-note-history"></div></form></dialog>
+  <dialog id="injectDialog" class="modal compact-modal"><div class="modal-head"><div><span class="eyebrow">RYTHME</span><h2>Injecter dans la partie</h2></div><button type="button" class="icon-btn" data-close="injectDialog"><img src="fermer.png" class="ui-icon close-ui-icon" alt=""></button></div><div id="injectContent" class="inject-content"></div></dialog>
+  <dialog id="backupsDialog" class="modal compact-modal"><div class="modal-head"><div><span class="eyebrow">SÉCURITÉ</span><h2>Backups locaux</h2></div><button type="button" class="icon-btn" data-close="backupsDialog"><img src="fermer.png" class="ui-icon close-ui-icon" alt=""></button></div><div id="backupList" class="backup-list"></div></dialog>
+  <dialog id="searchDialog" class="modal compact-modal"><div class="modal-head"><div><span class="eyebrow">RECHERCHE</span><h2>Retrouver rapidement</h2></div><button type="button" class="icon-btn" data-close="searchDialog"><img src="fermer.png" class="ui-icon close-ui-icon" alt=""></button></div><div class="search-box"><input id="searchInput" type="search" placeholder="Lieu, PNJ, secret, note…"><div id="searchResults" class="search-results"></div></div></dialog>
+
+
+  <dialog id="newSessionDialog" class="modal compact-modal"><form id="newSessionForm"><div class="modal-head"><div><span class="eyebrow">NOUVELLE SESSION</span><h2>Créer une préparation</h2><p class="dialog-hint">La session actuellement ouverte sera conservée automatiquement dans les sessions sauvegardées.</p></div><button type="button" class="icon-btn" data-close="newSessionDialog"><img src="fermer.png" class="ui-icon close-ui-icon" alt=""></button></div><label class="solo-label">Nom de la session<input name="name" autocomplete="off" placeholder="Ex. Le village qui oubliait"></label><div class="modal-actions"><span></span><span></span><button type="button" class="ghost" data-close="newSessionDialog">Annuler</button><button type="submit" class="primary">Créer</button></div></form></dialog>
+
+  <dialog id="timerResetDialog" class="modal compact-modal timer-reset-dialog"><div class="modal-head"><div><span class="eyebrow">COMPTEUR DE SESSION</span><h2>Remettre le compteur à zéro ?</h2><p class="dialog-hint">Cette action efface la durée actuellement comptabilisée pour cette session.</p></div><button type="button" class="icon-btn" data-close="timerResetDialog"><img src="fermer.png" class="ui-icon close-ui-icon" alt=""></button></div><div class="modal-actions timer-reset-actions"><button type="button" id="btnCancelTimerReset" class="timer-reset-no">NON</button><button type="button" id="btnConfirmTimerReset" class="danger">OUI</button></div></dialog>
+
+  <div id="sessionStartFx" class="session-start-fx" aria-hidden="true"><div class="fx-ring"></div><div class="fx-ring second"></div><strong>LA SESSION COMMENCE</strong><span>Que faites-vous ?</span></div>
+
+  <input id="importFile" type="file" accept=".cockpit,.json,application/json" hidden>
+  <input id="savedSessionImportFile" type="file" accept=".json,.cockpit,application/json" hidden>
+  <input id="npcImportFile" type="file" accept=".json,application/json" hidden>
+  <input id="locationImportFile" type="file" accept=".json,application/json" hidden>
+  <input id="illustrationImportFile" type="file" accept="image/png,image/jpeg,.png,.jpg,.jpeg" multiple hidden>
+  <dialog id="ambienceDrawer" aria-labelledby="ambienceDrawerTitle"><div class="modal-head"><h2 id="ambienceDrawerTitle">Ambiances</h2><button type="button" class="icon-btn" data-close="ambienceDrawer" aria-label="Fermer les ambiances"><img src="fermer.png" class="ui-icon" alt=""></button></div><div id="ambienceDrawerList"></div><div class="modal-actions"><button id="btnManageAmbiences" class="ghost">Gérer les ambiances</button></div></dialog>
+  <script src="app.js?v=2.0.7"></script>
+</body>
+</html>
