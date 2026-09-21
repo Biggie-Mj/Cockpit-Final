@@ -352,3 +352,34 @@ button.rhythm-row:active{filter:brightness(1.18)}
 .player-ribbon{height:60px!important}
 .player-chip{grid-template-rows:minmax(0,1fr)}
 .player-chip .spotlight-ui-icon{width:38px;height:38px}
+
+
+/* ===== V2.0.10 — noms d’illustrations + ambiances ordonnées/incomplètes ===== */
+.illustration-card-select{display:flex;flex-direction:column;align-items:stretch;width:100%;padding:0;border:0;border-radius:0;background:transparent;text-align:left;color:inherit;box-shadow:none;transform:none!important}
+.illustration-card-select:active{transform:none!important}
+.illustration-card-footer{padding-right:42px}
+.illustration-rename-btn{position:absolute;right:7px;bottom:7px;z-index:3;display:grid;place-items:center;width:30px;height:30px;padding:5px;border:1px solid #665044;border-radius:8px;background:rgba(28,21,17,.94);box-shadow:0 2px 8px rgba(0,0,0,.28)}
+.illustration-rename-btn .ui-icon{width:18px;height:18px;object-fit:contain}
+.illustration-import-row{grid-template-columns:minmax(0,1fr) minmax(150px,220px) 190px}
+.illustration-import-name{min-width:0;min-height:38px}
+.ambience-library-card.ambience-incomplete{border-color:#a94747;box-shadow:inset 0 0 0 1px rgba(169,71,71,.22);background:linear-gradient(180deg,#1a1010,#110d0c)}
+.ambience-library-card.ambience-incomplete .subtitle{color:#ef8f8f;font-weight:900}
+.ambience-order-controls{display:inline-flex;gap:4px;margin-right:auto}
+.ambience-order-btn{display:grid!important;place-items:center!important;width:38px;min-width:38px;height:38px;padding:4px!important}
+.ambience-order-btn .ui-icon{width:20px;height:20px;object-fit:contain}
+.ambience-order-btn:disabled{opacity:.28}
+#ambienceDrawerList .ambience-row{margin:6px 0;padding:10px;border:1px solid transparent;border-bottom-color:#59422c;border-radius:9px}
+#ambienceDrawerList .ambience-row.ambience-incomplete{border-color:#a94747;background:rgba(89,25,25,.18);box-shadow:inset 0 0 0 1px rgba(169,71,71,.15)}
+.ambience-row-label{display:grid;gap:3px;min-width:0}
+.ambience-row-label small{color:#ef8f8f;font-size:8px;font-weight:900;letter-spacing:.06em;text-transform:uppercase}
+@media(max-width:900px){.illustration-import-row{grid-template-columns:minmax(0,1fr);}.illustration-import-row select,.illustration-import-name{width:100%}}
+
+.ambience-drawer-actions{display:flex;align-items:center;gap:6px;flex-shrink:0}#ambienceDrawer .ambience-order-controls{margin-right:0}#ambienceDrawer .ambience-order-btn{width:34px;min-width:34px;height:34px}#ambienceDrawer .ambience-order-btn .ui-icon{width:18px;height:18px}
+
+
+/* ===== V2.0.11 — aperçu des illustrations pendant le classement ===== */
+.illustration-import-row{grid-template-columns:116px minmax(0,1fr) minmax(150px,220px) 190px;align-items:center}
+.illustration-import-preview{width:116px;height:88px;border:1px solid #4b3930;border-radius:9px;overflow:hidden;background:#090706;display:grid;place-items:center}
+.illustration-import-preview img{display:block;width:100%;height:100%;object-fit:contain;background:#090706}
+.illustration-import-file{min-width:0}
+@media(max-width:900px){.illustration-import-row{grid-template-columns:92px minmax(0,1fr)}.illustration-import-preview{width:92px;height:74px}.illustration-import-name,.illustration-import-row select{grid-column:1/-1;width:100%}}

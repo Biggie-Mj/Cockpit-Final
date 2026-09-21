@@ -1,6 +1,6 @@
-const CACHE='cockpit-v2-text-layout-spotlight-1';
+const CACHE='cockpit-v2-illustration-import-preview-1';
 const SHELL=[
-  './','./index.html','./styles.css?v=2.0.9','./app.js?v=2.0.9','./manifest.webmanifest?v=2.0.8'
+  './','./index.html','./styles.css?v=2.0.11','./app.js?v=2.0.11','./manifest.webmanifest?v=2.0.10'
 ];
 const MEDIA=[
   './menu-background-v1.jpg?v=2.0.2','./icon-512.png','./icon-192.png','./icon-64.png','./apple-touch-icon.png','./favicon-32.png','./music-note.png','./loupe.png','./annuler.png','./menu_trois_points.png','./coche.png','./plus.png','./jouer.png','./sauvegarde.png','./fermer.png','./crayon.png','./actualiser.png','./fleche_gauche.png','./parchemin.png','./d20.png','./rouage.png','./grimoire.png','./oeil.png','./plume.png','./etoile.png','./groupe.png','./eclair.png','./point_exclamation.png','./marqueur_carte.png','./epingle.png','./sablier.png','./fleche_bas.png','./fleche_haut.png','./spotlight.png','./bulle_dialogue.png','./magie.png','./cerveau.png'

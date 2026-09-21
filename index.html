@@ -8,10 +8,10 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black">
   <meta name="apple-mobile-web-app-title" content="Cockpit">
   <title>Cockpit V2 — Préparation D&D 5e</title>
-  <link rel="manifest" href="manifest.webmanifest?v=2.0.8">
+  <link rel="manifest" href="manifest.webmanifest?v=2.0.10">
   <link rel="apple-touch-icon" href="apple-touch-icon.png?v=2.0.2">
   <link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png?v=2.0.2">
-  <link rel="stylesheet" href="styles.css?v=2.0.9">
+  <link rel="stylesheet" href="styles.css?v=2.0.10">
 </head>
 <body>
 
@@ -170,7 +170,7 @@
 
   <dialog id="illustrationImportDialog" class="modal wide-modal">
     <form id="illustrationImportForm">
-      <div class="modal-head"><div><span class="eyebrow">ILLUSTRATIONS</span><h2>Classer les images importées</h2><p class="dialog-hint">Choisis une catégorie pour chaque PNG ou JPEG avant de l’ajouter à Cockpit.</p></div><button type="button" class="icon-btn" data-close="illustrationImportDialog"><img src="fermer.png" class="ui-icon close-ui-icon" alt=""></button></div>
+      <div class="modal-head"><div><span class="eyebrow">ILLUSTRATIONS</span><h2>Classer les images importées</h2><p class="dialog-hint">Donne un nom à chaque image et choisis sa catégorie avant de l’ajouter à Cockpit.</p></div><button type="button" class="icon-btn" data-close="illustrationImportDialog"><img src="fermer.png" class="ui-icon close-ui-icon" alt=""></button></div>
       <div id="illustrationImportRows" class="illustration-import-rows"></div>
       <div class="modal-actions illustration-import-actions"><span></span><span></span><button type="button" class="ghost" data-close="illustrationImportDialog">Annuler</button><button type="submit" class="violet">Importer les images</button></div>
     </form>
@@ -185,6 +185,14 @@
     <div class="modal-head"><div><span class="eyebrow">ILLUSTRATIONS</span><h2>Nouvelle catégorie</h2><p class="dialog-hint">La catégorie sera ajoutée sous les catégories existantes.</p></div><button type="button" class="icon-btn" data-close="illustrationCategoryDialog"><img src="fermer.png" class="ui-icon close-ui-icon" alt=""></button></div>
     <label class="solo-label">Nom de la catégorie<input name="name" required maxlength="40" autocomplete="off" placeholder="Ex. Alliés, Cartes, Artefacts…"></label>
     <div class="modal-actions illustration-category-actions"><span></span><span></span><button type="button" class="ghost" data-close="illustrationCategoryDialog">Annuler</button><button type="submit" class="illustration-category-btn">Créer</button></div>
+  </form></dialog>
+
+
+
+  <dialog id="illustrationRenameDialog" class="modal compact-modal"><form id="illustrationRenameForm">
+    <div class="modal-head"><div><span class="eyebrow">ILLUSTRATIONS</span><h2>Renommer l’illustration</h2><p class="dialog-hint">Ce nom sera aussi utilisé comme nom de fichier lors de l’export.</p></div><button type="button" class="icon-btn" data-close="illustrationRenameDialog"><img src="fermer.png" class="ui-icon close-ui-icon" alt=""></button></div>
+    <label class="solo-label">Nom de l’illustration<input name="name" required maxlength="120" autocomplete="off" placeholder="Ex. Othrion au-dessus de Dorwine"></label>
+    <div class="modal-actions"><span></span><span></span><button type="button" class="ghost" data-close="illustrationRenameDialog">Annuler</button><button type="submit" class="primary">Enregistrer</button></div>
   </form></dialog>
 
   <dialog id="quickNoteDialog" class="modal wide-modal"><form id="quickNoteForm"><div class="modal-head"><div><span class="eyebrow">NOTES DE SESSION</span><h2>Suivi des notes</h2><p class="dialog-hint">Toutes les notes prises pendant cette session restent visibles ici.</p></div><button type="button" class="icon-btn" data-close="quickNoteDialog"><img src="fermer.png" class="ui-icon close-ui-icon" alt=""></button></div><div class="quick-note-form"><textarea name="text" rows="4" placeholder="Ce qui devient vrai à la table…"></textarea><select name="type"><option value="note">Note</option><option value="decision">⚑ Décision</option><option value="quote">💬 Citation</option><option value="question">❓ Question</option><option value="death">💀 Mort</option><option value="loot">🎁 Butin</option><option value="lead">🔗 Piste</option></select><button type="submit" class="primary quick-note-submit">Ajouter</button></div><div class="note-history-head"><span class="eyebrow">DÉJÀ NOTÉ</span><strong>Historique de la session</strong></div><div id="quickNoteHistory" class="quick-note-history"></div></form></dialog>
@@ -205,6 +213,6 @@
   <input id="locationImportFile" type="file" accept=".json,application/json" hidden>
   <input id="illustrationImportFile" type="file" accept="image/png,image/jpeg,.png,.jpg,.jpeg" multiple hidden>
   <dialog id="ambienceDrawer" aria-labelledby="ambienceDrawerTitle"><div class="modal-head"><h2 id="ambienceDrawerTitle">Ambiances</h2><button type="button" class="icon-btn" data-close="ambienceDrawer" aria-label="Fermer les ambiances"><img src="fermer.png" class="ui-icon" alt=""></button></div><div id="ambienceDrawerList"></div><div class="modal-actions"><button id="btnManageAmbiences" class="ghost">Gérer les ambiances</button></div></dialog>
-  <script src="app.js?v=2.0.9"></script>
+  <script src="app.js?v=2.0.10"></script>
 </body>
 </html>
