@@ -316,7 +316,7 @@ function renderLiveLocation(l){
   const npcStrip=npcs.length?`<div class="live-npc-strip"><span class="eyebrow">PNJ PRÉSENTS</span><div class="live-npc-list">${npcs.map(n=>`<button class="live-npc" data-live-npc="${n.id}"><span class="avatar">${initials(n.name)}</span><strong>${esc(n.name)}</strong></button>`).join('')}</div></div>`:'';
   const injections=(sit.length||thr.length)?`<div class="live-injections"><div class="injection-strip">${thr.map(t=>`<button class="injection-chip threat ${t.activeInjected?'active':'inactive'}" data-toggle-injection="threat:${t.id}"><span class="eyebrow injection-label">MENACE INJECTÉE</span><b>${uiIcon('point_exclamation','ui-icon inline-ui-icon')} ${esc(t.name)}</b><small>${esc(t.summary||'')}</small></button>`).join('')}${sit.map(s=>`<button class="injection-chip situation ${s.activeInjected?'active':'inactive'}" data-toggle-injection="situation:${s.id}"><span class="eyebrow injection-label">SITUATION INJECTÉE</span><b>${uiIcon('etoile','ui-icon inline-ui-icon')} ${esc(s.text)}</b></button>`).join('')}</div></div>`:'';
   const musicButton=l.spotifyUrl?`<button id="btnLocationMusic" class="location-music-btn ${activeMusicLocationId===l.id?'active':''}" aria-label="Lancer le son Spotify de ${esc(l.name)}" title="Lancer la musique / ambiance"><img src="music-note.png" alt=""></button>`:'';
-  el.innerHTML=`<div class="live-hero"><div><span class="eyebrow">${isCurrent?'LIEU ACTUEL':'APERÇU · LE JEU EST AILLEURS'}</span><div class="live-title-row">${musicButton}<h2>${esc(l.name)}</h2></div><p class="concept">${esc(l.concept||'')}</p>${npcStrip}</div><div class="live-actions">${!isCurrent?`<button id="btnMakeCurrent" class="primary">${uiIcon('marqueur_carte','ui-icon button-ui-icon')} Rendre actuel</button><button id="btnReturnCurrent" class="ghost">${uiIcon('fleche_gauche','ui-icon button-ui-icon')} Actuel</button>`:''}<button id="btnEditPreview" class="ghost edit-pencil" aria-label="Modifier le lieu" title="Modifier le lieu">${uiIcon('crayon','ui-icon edit-ui-icon')}</button></div></div>${injections}
+  el.innerHTML=`<div class="live-hero"><div><span class="eyebrow">${isCurrent?'LIEU ACTUEL':'APERÇU · LE JEU EST AILLEURS'}</span><div class="live-title-row">${musicButton}<h2>${esc(l.name)}</h2></div><p class="concept">${esc(l.concept||'')}</p>${npcStrip}</div><div class="live-actions">${!isCurrent?`<button id="btnMakeCurrent" class="primary">${uiIcon('marqueur_carte','ui-icon button-ui-icon')} Rendre actuel</button><button id="btnReturnCurrent" class="ghost">${uiIcon('fleche_gauche','ui-icon button-ui-icon')} Actuel</button>`:''}${!isCurrent&&l.status==='visited'?`<button id="btnMarkUnvisited" class="ghost">${uiIcon('annuler','ui-icon button-ui-icon')} Non visité</button>`:''}<button id="btnEditPreview" class="ghost edit-pencil" aria-label="Modifier le lieu" title="Modifier le lieu">${uiIcon('crayon','ui-icon edit-ui-icon')}</button></div></div>${injections}
   <div class="live-core">
     <article><h3>Qu’est-ce qu’on voit ?</h3>${visuals.length?`<ul>${visuals.map(v=>`<li>${esc(v)}</li>`).join('')}</ul>`:'<p class="muted">À improviser.</p>'}</article>
     <article class="impulse"><h3>Impulsion</h3><p>${esc(l.impulse||'Comment ce lieu tend-il à agir ?')}</p></article>
@@ -326,7 +326,7 @@ function renderLiveLocation(l){
     <article class="wide consequence"><h3>Si les PJ n’agissent pas</h3><p>${esc(l.ifIgnored||'Le lieu reste stable pour le moment.')}</p></article>
   </div>
   <details class="location-context"><summary>Contexte du lieu</summary><div class="context-grid">${l.faction?`<div><b>Faction</b><p>${esc(l.faction)}</p></div>`:''}${l.localPlot?`<div><b>Local</b><p>${esc(l.localPlot)}</p></div>`:''}${l.regionalPlot?`<div><b>Régional</b><p>${esc(l.regionalPlot)}</p></div>`:''}${l.mainPlot?`<div><b>Fil rouge</b><p>${esc(l.mainPlot)}</p></div>`:''}</div></details>`;
-  $('#btnEditPreview').onclick=()=>openLocationEditor(l.id);if($('#btnMakeCurrent'))$('#btnMakeCurrent').onclick=()=>makeCurrentLocation(l.id);if($('#btnReturnCurrent'))$('#btnReturnCurrent').onclick=()=>{state.previewLocationId=state.activeLocationId;persist();renderTable()};
+  $('#btnEditPreview').onclick=()=>openLocationEditor(l.id);if($('#btnMakeCurrent'))$('#btnMakeCurrent').onclick=()=>makeCurrentLocation(l.id);if($('#btnReturnCurrent'))$('#btnReturnCurrent').onclick=()=>{state.previewLocationId=state.activeLocationId;persist();renderTable()};if($('#btnMarkUnvisited'))$('#btnMarkUnvisited').onclick=()=>commit(()=>{l.status='unvisited'},`${l.name} · à explorer`);
   const musicBtn=$('#btnLocationMusic');if(musicBtn)musicBtn.onclick=()=>{const url=String(l.spotifyUrl||'').trim();if(!/^(https?:\/\/|spotify:)/i.test(url))return toast('Lien Spotify invalide');activeMusicLocationId=l.id;musicBtn.classList.add('active');const a=document.createElement('a');a.href=url;a.target='_blank';a.rel='noopener noreferrer';document.body.appendChild(a);a.click();a.remove()};
   $$('[data-live-npc]').forEach(b=>b.onclick=()=>showNpcSheet(b.dataset.liveNpc));$$('[data-toggle-injection]').forEach(b=>b.onclick=()=>toggleInjectedHighlight(b.dataset.toggleInjection));
 }
@@ -622,10 +622,10 @@ const ILLUSTRATION_DB_VERSION=2;
 const ILLUSTRATION_STORE='illustrations';
 const ILLUSTRATION_META_STORE='meta';
 const DEFAULT_ILLUSTRATION_CATEGORIES=[
-  ['npc','PNJ'],['adversary','Adversaires'],['location','Lieux'],['object','Objets'],['misc','Divers']
+  ['npc','PNJ','#5f7f9e'],['adversary','Adversaires','#985c5c'],['location','Lieux','#64866a'],['object','Objets','#967849'],['misc','Divers','#766b8f']
 ];
-let illustrationCategories=[...DEFAULT_ILLUSTRATION_CATEGORIES];
-let illustrationCustomCategories=[];
+let illustrationCategories=DEFAULT_ILLUSTRATION_CATEGORIES.map(x=>[...x]);
+let illustrationOrders={};
 let illustrationDbPromise=null;
 let illustrationRecords=[];
 let illustrationSelectedIds=new Set();
@@ -634,8 +634,27 @@ let pendingIllustrationFiles=[];
 let pendingIllustrationPreviewUrls=[];
 let illustrationMoveMode=false;
 let illustrationRenderToken=0;
-function illustrationCategoryLabel(value){return Object.fromEntries(illustrationCategories)[value]||'Divers'}
-function illustrationCategoryOptions(selected='misc'){return illustrationCategories.map(([value,label])=>`<option value="${value}" ${value===selected?'selected':''}>${esc(label)}</option>`).join('')}
+let editingIllustrationCategoryId=null;
+function normalizeIllustrationColor(value,fallback='#6f7d8c'){const color=String(value||'').trim();return /^#[0-9a-f]{6}$/i.test(color)?color.toLowerCase():fallback}
+function normalizeStoredIllustrationCategories(stored){
+  if(stored&&typeof stored==='object'&&!Array.isArray(stored)&&Array.isArray(stored.items)){
+    const seen=new Set(),items=stored.items.map((item,i)=>{const value=String(item?.value||'').trim(),label=String(item?.label||'').trim(),color=normalizeIllustrationColor(item?.color,DEFAULT_ILLUSTRATION_CATEGORIES[i%DEFAULT_ILLUSTRATION_CATEGORIES.length]?.[2]||'#6f7d8c');if(!value||!label||seen.has(value))return null;seen.add(value);return [value,label,color]}).filter(Boolean);
+    if(items.length)return items;
+  }
+  const legacy=Array.isArray(stored)?stored.filter(x=>Array.isArray(x)&&String(x[0]||'').trim()&&String(x[1]||'').trim()):[];
+  const categories=DEFAULT_ILLUSTRATION_CATEGORIES.map(x=>[...x]),seen=new Set(categories.map(x=>x[0]));
+  legacy.forEach((x,i)=>{const value=String(x[0]).trim();if(seen.has(value))return;seen.add(value);categories.push([value,String(x[1]).trim(),normalizeIllustrationColor(x[2],['#6b7f9e','#807259','#6d8a75','#8d687e'][i%4])])});
+  return categories;
+}
+function serializedIllustrationCategories(categories=illustrationCategories){return {version:2,items:categories.map(([value,label,color])=>({value,label,color:normalizeIllustrationColor(color)}))}}
+function illustrationFallbackCategory(exclude=''){return illustrationCategories.find(([value])=>value==='misc'&&value!==exclude)?.[0]||illustrationCategories.find(([value])=>value!==exclude)?.[0]||''}
+function illustrationCategoryExists(value){return illustrationCategories.some(([id])=>id===value)}
+function illustrationCategoryForRecord(item){return illustrationCategoryExists(item?.category)?item.category:illustrationFallbackCategory()}
+function illustrationCategoryLabel(value){return illustrationCategories.find(([id])=>id===value)?.[1]||illustrationCategories.find(([id])=>id===illustrationFallbackCategory())?.[1]||'Divers'}
+function illustrationCategoryColor(value){return normalizeIllustrationColor(illustrationCategories.find(([id])=>id===value)?.[2])}
+function illustrationCategoryOptions(selected){const fallback=illustrationFallbackCategory(),choice=illustrationCategoryExists(selected)?selected:fallback;return illustrationCategories.map(([value,label])=>`<option value="${value}" ${value===choice?'selected':''}>${esc(label)}</option>`).join('')}
+function illustrationColorRgba(color,alpha){const c=normalizeIllustrationColor(color).slice(1),r=parseInt(c.slice(0,2),16),g=parseInt(c.slice(2,4),16),b=parseInt(c.slice(4,6),16);return `rgba(${r},${g},${b},${alpha})`}
+function illustrationCategoryStyle(color){const safe=normalizeIllustrationColor(color);return `--illustration-category-color:${safe};--illustration-category-tint:${illustrationColorRgba(safe,.11)};--illustration-category-border:${illustrationColorRgba(safe,.48)}`}
 function cleanupIllustrationObjectUrls(){illustrationObjectUrls.forEach(url=>URL.revokeObjectURL(url));illustrationObjectUrls=[]}
 function cleanupPendingIllustrationPreviewUrls(){pendingIllustrationPreviewUrls.forEach(url=>URL.revokeObjectURL(url));pendingIllustrationPreviewUrls=[]}
 function openIllustrationDb(){
@@ -649,33 +668,42 @@ function openIllustrationDb(){
   return illustrationDbPromise;
 }
 async function getAllIllustrations(){const db=await openIllustrationDb();return new Promise((resolve,reject)=>{const tx=db.transaction(ILLUSTRATION_STORE,'readonly'),req=tx.objectStore(ILLUSTRATION_STORE).getAll();req.onsuccess=()=>resolve(req.result||[]);req.onerror=()=>reject(req.error)})}
-async function getIllustrationCustomCategories(){const db=await openIllustrationDb();return new Promise((resolve,reject)=>{const tx=db.transaction(ILLUSTRATION_META_STORE,'readonly'),req=tx.objectStore(ILLUSTRATION_META_STORE).get('categories');req.onsuccess=()=>resolve(Array.isArray(req.result?.value)?req.result.value:[]);req.onerror=()=>reject(req.error)})}
-async function putIllustrationCustomCategories(categories){const db=await openIllustrationDb();return new Promise((resolve,reject)=>{const tx=db.transaction(ILLUSTRATION_META_STORE,'readwrite');tx.objectStore(ILLUSTRATION_META_STORE).put({key:'categories',value:categories});tx.oncomplete=()=>resolve();tx.onerror=()=>reject(tx.error);tx.onabort=()=>reject(tx.error||new Error('Enregistrement des catégories interrompu'))})}
+async function getIllustrationCategoryConfig(){const db=await openIllustrationDb();return new Promise((resolve,reject)=>{const tx=db.transaction(ILLUSTRATION_META_STORE,'readonly'),req=tx.objectStore(ILLUSTRATION_META_STORE).get('categories');req.onsuccess=()=>resolve(req.result?.value??null);req.onerror=()=>reject(req.error)})}
+async function putIllustrationCategoryConfig(categories=illustrationCategories){const db=await openIllustrationDb();return new Promise((resolve,reject)=>{const tx=db.transaction(ILLUSTRATION_META_STORE,'readwrite');tx.objectStore(ILLUSTRATION_META_STORE).put({key:'categories',value:serializedIllustrationCategories(categories)});tx.oncomplete=()=>resolve();tx.onerror=()=>reject(tx.error);tx.onabort=()=>reject(tx.error||new Error('Enregistrement des catégories interrompu'))})}
+async function getIllustrationOrders(){const db=await openIllustrationDb();return new Promise((resolve,reject)=>{const tx=db.transaction(ILLUSTRATION_META_STORE,'readonly'),req=tx.objectStore(ILLUSTRATION_META_STORE).get('orders');req.onsuccess=()=>resolve(req.result?.value&&typeof req.result.value==='object'?req.result.value:{});req.onerror=()=>reject(req.error)})}
+async function putIllustrationOrders(orders=illustrationOrders){const db=await openIllustrationDb();return new Promise((resolve,reject)=>{const tx=db.transaction(ILLUSTRATION_META_STORE,'readwrite');tx.objectStore(ILLUSTRATION_META_STORE).put({key:'orders',value:orders});tx.oncomplete=()=>resolve();tx.onerror=()=>reject(tx.error);tx.onabort=()=>reject(tx.error||new Error('Enregistrement de l’ordre interrompu'))})}
 async function putIllustrations(records){if(!records.length)return;const db=await openIllustrationDb();return new Promise((resolve,reject)=>{const tx=db.transaction(ILLUSTRATION_STORE,'readwrite'),store=tx.objectStore(ILLUSTRATION_STORE);records.forEach(record=>store.put(record));tx.oncomplete=()=>resolve();tx.onerror=()=>reject(tx.error);tx.onabort=()=>reject(tx.error||new Error('Import interrompu'))})}
 async function deleteIllustrations(ids){if(!ids.length)return;const db=await openIllustrationDb();return new Promise((resolve,reject)=>{const tx=db.transaction(ILLUSTRATION_STORE,'readwrite'),store=tx.objectStore(ILLUSTRATION_STORE);ids.forEach(id=>store.delete(id));tx.oncomplete=()=>resolve();tx.onerror=()=>reject(tx.error);tx.onabort=()=>reject(tx.error||new Error('Suppression interrompue'))})}
 function isSupportedIllustrationFile(file){const type=String(file?.type||'').toLowerCase();return type==='image/png'||type==='image/jpeg'||/\.(png|jpe?g)$/i.test(String(file?.name||''))}
 function illustrationFileType(file){const type=String(file?.type||'').toLowerCase();if(type==='image/png')return 'image/png';if(type==='image/jpeg')return 'image/jpeg';return /\.png$/i.test(file?.name||'')?'image/png':'image/jpeg'}
 function humanFileSize(bytes){const n=Number(bytes)||0;if(n<1024)return `${n} o`;if(n<1024*1024)return `${(n/1024).toFixed(n<10240?1:0)} Ko`;return `${(n/1024/1024).toFixed(1)} Mo`}
-function renderIllustrationSelectionMeta(){const count=illustrationSelectedIds.size,meta=$('#illustrationSelectionMeta'),exportButton=$('#btnExportIllustrations'),deleteButton=$('#btnDeleteIllustrations'),moveButton=$('#btnMoveIllustrations'),panel=$('.illustrations-panel');if(!count&&illustrationMoveMode)illustrationMoveMode=false;if(meta)meta.textContent=illustrationMoveMode?'Choisis la catégorie de destination':(count?`${count} sélectionnée${count>1?'s':''}`:'Aucune sélection');if(exportButton){exportButton.disabled=!count;exportButton.innerHTML=`${uiIcon('fleche_haut','ui-icon button-ui-icon')} Exporter${count?` (${count})`:''}`;}if(deleteButton){deleteButton.disabled=!count;deleteButton.textContent=count?`Supprimer (${count})`:'Supprimer'}if(moveButton){moveButton.disabled=!count;moveButton.classList.toggle('active',illustrationMoveMode);moveButton.textContent=illustrationMoveMode?'Annuler déplacement':(count?`Déplacer (${count})`:'Déplacer')}if(panel)panel.classList.toggle('move-mode',illustrationMoveMode)}
+function normalizeIllustrationOrders(raw,records){
+  const source=raw&&typeof raw==='object'?raw:{},sorted=[...records].sort((a,b)=>String(b.createdAt||'').localeCompare(String(a.createdAt||''))),out={};
+  illustrationCategories.forEach(([category])=>{const valid=sorted.filter(item=>illustrationCategoryForRecord(item)===category).map(item=>item.id),validSet=new Set(valid),seen=new Set(),preferred=Array.isArray(source[category])?source[category]:[];out[category]=preferred.filter(id=>validSet.has(id)&&!seen.has(id)&&(seen.add(id),true));valid.forEach(id=>{if(!seen.has(id)){seen.add(id);out[category].push(id)}})});
+  return out;
+}
+function orderedIllustrationsForCategory(category,records=illustrationRecords){const byId=new Map(records.map(item=>[item.id,item])),ids=illustrationOrders[category]||[],seen=new Set(),arr=[];ids.forEach(id=>{const item=byId.get(id);if(item&&illustrationCategoryForRecord(item)===category&&!seen.has(id)){seen.add(id);arr.push(item)}});[...records].sort((a,b)=>String(b.createdAt||'').localeCompare(String(a.createdAt||''))).forEach(item=>{if(illustrationCategoryForRecord(item)===category&&!seen.has(item.id)){seen.add(item.id);arr.push(item)}});return arr}
+function allIllustrationsInDisplayOrder(records=illustrationRecords){return illustrationCategories.flatMap(([category])=>orderedIllustrationsForCategory(category,records))}
+function renderIllustrationSelectionMeta(){const count=illustrationSelectedIds.size,meta=$('#illustrationSelectionMeta'),exportButton=$('#btnExportIllustrations'),deleteButton=$('#btnDeleteIllustrations'),moveButton=$('#btnMoveIllustrations'),panel=$('.illustrations-panel');if(!count&&illustrationMoveMode)illustrationMoveMode=false;if(meta)meta.textContent=illustrationMoveMode?'Choisis une image cible ou une catégorie':(count?`${count} sélectionnée${count>1?'s':''}`:'Aucune sélection');if(exportButton){exportButton.disabled=!count;exportButton.innerHTML=`${uiIcon('fleche_haut','ui-icon button-ui-icon')} Exporter${count?` (${count})`:''}`;}if(deleteButton){deleteButton.disabled=!count;deleteButton.textContent=count?`Supprimer (${count})`:'Supprimer'}if(moveButton){moveButton.disabled=!count;moveButton.classList.toggle('active',illustrationMoveMode);moveButton.textContent=illustrationMoveMode?'Annuler déplacement':(count?`Déplacer (${count})`:'Déplacer')}if(panel)panel.classList.toggle('move-mode',illustrationMoveMode)}
 async function renderIllustrations(){
   const content=$('#illustrationsContent');if(!content)return;
   const token=++illustrationRenderToken;
   content.innerHTML='<div class="journal-empty">Chargement des illustrations…</div>';
   try{
-    const [records,customCategories]=await Promise.all([getAllIllustrations(),getIllustrationCustomCategories()]);if(token!==illustrationRenderToken)return;
-    illustrationCustomCategories=customCategories.filter(x=>Array.isArray(x)&&x.length===2&&String(x[0]||'').trim()&&String(x[1]||'').trim());illustrationCategories=[...DEFAULT_ILLUSTRATION_CATEGORIES,...illustrationCustomCategories];
-    illustrationRecords=records.sort((a,b)=>String(b.createdAt||'').localeCompare(String(a.createdAt||'')));
+    const [records,storedCategories,storedOrders]=await Promise.all([getAllIllustrations(),getIllustrationCategoryConfig(),getIllustrationOrders()]);if(token!==illustrationRenderToken)return;
+    illustrationCategories=normalizeStoredIllustrationCategories(storedCategories);illustrationOrders=normalizeIllustrationOrders(storedOrders,records);illustrationRecords=allIllustrationsInDisplayOrder(records);
     const validIds=new Set(illustrationRecords.map(x=>x.id));illustrationSelectedIds=new Set([...illustrationSelectedIds].filter(id=>validIds.has(id)));
     cleanupIllustrationObjectUrls();
-    const categories=illustrationCategories.map(([value,label],catIndex)=>{
-      const arr=illustrationRecords.filter(x=>(x.category||'misc')===value),sentCount=arr.filter(x=>x.sentAt).length;
+    const categories=illustrationCategories.map(([value,label,color],catIndex)=>{
+      const arr=orderedIllustrationsForCategory(value,illustrationRecords),sentCount=arr.filter(x=>x.sentAt).length;
       const cards=arr.map(item=>{const url=URL.createObjectURL(item.blob);illustrationObjectUrls.push(url);const selected=illustrationSelectedIds.has(item.id);return `<div class="illustration-card ${item.sentAt?'sent':''} ${selected?'selected':''} ${selected&&illustrationMoveMode?'moving':''}"><button type="button" class="illustration-card-select" data-illustration-id="${item.id}" aria-pressed="${selected?'true':'false'}"><img src="${url}" alt="${esc(item.name||label)}"><span class="illustration-card-footer"><strong>${esc(item.name||'Illustration')}</strong><small>${item.sentAt?`Envoyée · ${new Date(item.sentAt).toLocaleDateString('fr-FR')}`:'Jamais envoyée'}</small></span></button><button type="button" class="illustration-rename-btn" data-illustration-rename="${item.id}" aria-label="Renommer ${esc(item.name||'Illustration')}" title="Renommer">${uiIcon('crayon','ui-icon')}</button></div>`}).join('')||'<div class="illustration-empty">Aucune illustration dans cette catégorie.</div>';
-      return `<details class="illustration-drawer" ${catIndex===0||arr.length?'open':''} data-illustration-drawer="${value}"><summary><span class="illustration-drawer-title"><strong>${label}</strong><span class="illustration-drawer-count">${arr.length}</span></span><span class="illustration-drawer-meta">${sentCount?`${sentCount} envoyée${sentCount>1?'s':''}`:'—'}</span></summary><div class="illustration-grid">${cards}</div></details>`;
+      return `<details class="illustration-drawer" ${catIndex===0||arr.length?'open':''} data-illustration-drawer="${value}" style="${illustrationCategoryStyle(color)}"><summary><span class="illustration-drawer-title"><strong>${esc(label)}</strong><span class="illustration-drawer-count">${arr.length}</span></span><span class="illustration-drawer-meta">${sentCount?`${sentCount} envoyée${sentCount>1?'s':''}`:'—'}</span><span class="illustration-category-edit-btn" data-edit-illustration-category="${value}" role="button" tabindex="0" aria-label="Modifier la catégorie ${esc(label)}" title="Modifier la catégorie">${uiIcon('crayon','ui-icon')}</span></summary><div class="illustration-grid">${cards}</div></details>`;
     }).join('');
     content.innerHTML=categories;
-    $$('[data-illustration-id]').forEach(selectButton=>selectButton.onclick=()=>{const id=selectButton.dataset.illustrationId,card=selectButton.closest('.illustration-card');if(illustrationSelectedIds.has(id))illustrationSelectedIds.delete(id);else illustrationSelectedIds.add(id);const selected=illustrationSelectedIds.has(id);card?.classList.toggle('selected',selected);card?.classList.toggle('moving',selected&&illustrationMoveMode);selectButton.setAttribute('aria-pressed',selected?'true':'false');renderIllustrationSelectionMeta()});
+    $$('[data-illustration-id]').forEach(selectButton=>selectButton.onclick=()=>{const id=selectButton.dataset.illustrationId,item=illustrationRecords.find(x=>x.id===id),card=selectButton.closest('.illustration-card');if(illustrationMoveMode){if(illustrationSelectedIds.has(id))return;moveSelectedIllustrations(illustrationCategoryForRecord(item),id);return}if(illustrationSelectedIds.has(id))illustrationSelectedIds.delete(id);else illustrationSelectedIds.add(id);const selected=illustrationSelectedIds.has(id);card?.classList.toggle('selected',selected);card?.classList.toggle('moving',selected&&illustrationMoveMode);selectButton.setAttribute('aria-pressed',selected?'true':'false');renderIllustrationSelectionMeta()});
     $$('[data-illustration-rename]').forEach(button=>button.onclick=e=>{e.preventDefault();e.stopPropagation();openIllustrationRenameDialog(button.dataset.illustrationRename)});
-    $$('[data-illustration-drawer] > summary').forEach(summary=>summary.onclick=e=>{if(!illustrationMoveMode)return;e.preventDefault();e.stopPropagation();moveSelectedIllustrations(summary.parentElement.dataset.illustrationDrawer)});
+    $$('[data-edit-illustration-category]').forEach(button=>{button.onclick=e=>{e.preventDefault();e.stopPropagation();openIllustrationCategoryDialog(button.dataset.editIllustrationCategory)};button.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();e.stopPropagation();openIllustrationCategoryDialog(button.dataset.editIllustrationCategory)}}});
+    $$('[data-illustration-drawer] > summary').forEach(summary=>summary.onclick=e=>{if(e.target.closest('[data-edit-illustration-category]'))return;if(!illustrationMoveMode)return;e.preventDefault();e.stopPropagation();moveSelectedIllustrations(summary.parentElement.dataset.illustrationDrawer)});
     renderIllustrationSelectionMeta();
   }catch(err){console.error('Illustrations',err);content.innerHTML='<div class="journal-empty">La bibliothèque locale d’illustrations n’est pas disponible sur cet appareil.</div>';renderIllustrationSelectionMeta()}
 }
@@ -683,41 +711,63 @@ async function copyIllustrationRecord(item,changes={}){const type=item.type||ite
 function toggleIllustrationMoveMode(){
   if(!illustrationSelectedIds.size)return toast('Sélectionne au moins une illustration');
   illustrationMoveMode=!illustrationMoveMode;renderIllustrationSelectionMeta();
-  if(illustrationMoveMode)toast('Choisis la catégorie de destination');
+  if(illustrationMoveMode)toast('Touche une image pour placer la sélection avant elle, ou un tiroir pour l’envoyer à la fin');
 }
-async function moveSelectedIllustrations(category){
+async function moveSelectedIllustrations(category,beforeId=null){
   if(!illustrationMoveMode||!illustrationSelectedIds.size)return;
-  if(!illustrationCategories.some(([value])=>value===category))return;
+  if(!illustrationCategoryExists(category))return;
+  if(beforeId&&illustrationSelectedIds.has(beforeId))return;
   const selected=illustrationRecords.filter(item=>illustrationSelectedIds.has(item.id));
   if(!selected.length){illustrationMoveMode=false;renderIllustrationSelectionMeta();return}
   try{
-    const moved=await Promise.all(selected.map(item=>copyIllustrationRecord(item,{category})));
-    await putIllustrations(moved);
-    const count=moved.length,label=illustrationCategoryLabel(category);
+    const selectedIds=selected.map(item=>item.id),nextOrders=normalizeIllustrationOrders(illustrationOrders,illustrationRecords);
+    Object.keys(nextOrders).forEach(key=>nextOrders[key]=nextOrders[key].filter(id=>!illustrationSelectedIds.has(id)));
+    const targetOrder=nextOrders[category]||(nextOrders[category]=[]),targetIndex=beforeId?targetOrder.indexOf(beforeId):-1,insertAt=targetIndex>=0?targetIndex:targetOrder.length;
+    targetOrder.splice(insertAt,0,...selectedIds);
+    const changed=await Promise.all(selected.filter(item=>item.category!==category).map(item=>copyIllustrationRecord(item,{category})));
+    if(changed.length)await putIllustrations(changed);
+    await putIllustrationOrders(nextOrders);illustrationOrders=nextOrders;
+    const count=selected.length,label=illustrationCategoryLabel(category),reordered=selected.every(item=>illustrationCategoryForRecord(item)===category);
     illustrationSelectedIds.clear();illustrationMoveMode=false;
     await renderIllustrations();
-    toast(`${count} illustration${count>1?'s':''} déplacée${count>1?'s':''} vers ${label}`);
+    toast(reordered?`${count} illustration${count>1?'s':''} réordonnée${count>1?'s':''}`:`${count} illustration${count>1?'s':''} déplacée${count>1?'s':''} vers ${label}`);
   }catch(err){console.error('Déplacement illustrations',err);toast('Impossible de déplacer la sélection')}
 }
-function openIllustrationCategoryDialog(){const f=$('#illustrationCategoryForm');f.reset();$('#illustrationCategoryDialog').showModal();setTimeout(()=>f.elements.name.focus(),40)}
-async function createIllustrationCategory(name){
-  const label=String(name||'').trim();if(!label)return toast('Donne un nom à la catégorie');
-  if(illustrationCategories.some(([,existing])=>String(existing).localeCompare(label,'fr',{sensitivity:'accent'})===0))return toast('Cette catégorie existe déjà');
-  const value=uid('cat');const next=[...illustrationCustomCategories,[value,label]];
-  try{await putIllustrationCustomCategories(next);illustrationCustomCategories=next;illustrationCategories=[...DEFAULT_ILLUSTRATION_CATEGORIES,...next];$('#illustrationCategoryDialog').close();await renderIllustrations();toast(`Catégorie « ${label} » ajoutée`)}catch(err){console.error('Création catégorie',err);toast('Impossible de créer cette catégorie')}
+function openIllustrationCategoryDialog(id=null){
+  const f=$('#illustrationCategoryForm'),category=id?illustrationCategories.find(([value])=>value===id):null;editingIllustrationCategoryId=category?.[0]||null;f.reset();f.elements.name.value=category?.[1]||'';f.elements.color.value=normalizeIllustrationColor(category?.[2], '#6f7d8c');
+  $('#illustrationCategoryDialogTitle').textContent=category?'Modifier la catégorie':'Nouvelle catégorie';$('#illustrationCategoryDialogHint').textContent=category?'Le nom et la couleur peuvent être modifiés à tout moment.':'La catégorie sera ajoutée sous les catégories existantes.';$('#btnSaveIllustrationCategory').textContent=category?'Enregistrer':'Créer';$('#btnDeleteIllustrationCategory').classList.toggle('hidden',!category);
+  $('#illustrationCategoryDialog').showModal();setTimeout(()=>f.elements.name.focus(),40)
+}
+async function saveIllustrationCategory(name,color){
+  const label=String(name||'').trim(),safeColor=normalizeIllustrationColor(color);if(!label)return toast('Donne un nom à la catégorie');
+  if(illustrationCategories.some(([value,existing])=>value!==editingIllustrationCategoryId&&String(existing).localeCompare(label,'fr',{sensitivity:'accent'})===0))return toast('Cette catégorie existe déjà');
+  try{
+    if(editingIllustrationCategoryId){const idx=illustrationCategories.findIndex(([value])=>value===editingIllustrationCategoryId);if(idx<0)return;illustrationCategories[idx]=[editingIllustrationCategoryId,label,safeColor];await putIllustrationCategoryConfig();$('#illustrationCategoryDialog').close();await renderIllustrations();toast(`Catégorie « ${label} » modifiée`);return}
+    const value=uid('cat');illustrationCategories.push([value,label,safeColor]);illustrationOrders[value]=[];await putIllustrationCategoryConfig();await putIllustrationOrders();$('#illustrationCategoryDialog').close();await renderIllustrations();toast(`Catégorie « ${label} » ajoutée`)
+  }catch(err){console.error('Enregistrement catégorie',err);toast('Impossible d’enregistrer cette catégorie')}
+}
+async function deleteIllustrationCategory(id){
+  const category=illustrationCategories.find(([value])=>value===id);if(!category)return;if(illustrationCategories.length<=1)return toast('Il faut conserver au moins une catégorie');
+  const fallback=illustrationFallbackCategory(id),fallbackLabel=illustrationCategoryLabel(fallback),items=illustrationRecords.filter(item=>illustrationCategoryForRecord(item)===id);if(!confirm(`Supprimer la catégorie « ${category[1]} » ?${items.length?` Ses ${items.length} illustration${items.length>1?'s':''} seront déplacées vers « ${fallbackLabel} ».`:''}`))return;
+  try{
+    const sourceOrder=(illustrationOrders[id]||items.map(x=>x.id)).filter(itemId=>items.some(x=>x.id===itemId)),moved=await Promise.all(items.map(item=>copyIllustrationRecord(item,{category:fallback})));if(moved.length)await putIllustrations(moved);
+    illustrationCategories=illustrationCategories.filter(([value])=>value!==id);const nextOrders={...illustrationOrders};delete nextOrders[id];nextOrders[fallback]=[...(nextOrders[fallback]||[]).filter(x=>!sourceOrder.includes(x)),...sourceOrder];illustrationOrders=nextOrders;
+    await putIllustrationCategoryConfig();await putIllustrationOrders();editingIllustrationCategoryId=null;$('#illustrationCategoryDialog').close();await renderIllustrations();toast(`Catégorie « ${category[1]} » supprimée`)
+  }catch(err){console.error('Suppression catégorie',err);toast('Impossible de supprimer cette catégorie')}
 }
 function openIllustrationImporter(){const input=$('#illustrationImportFile');if(input){input.value='';input.click()}}
 function prepareIllustrationImport(files){
   cleanupPendingIllustrationPreviewUrls();
   pendingIllustrationFiles=[...files].filter(isSupportedIllustrationFile);
   if(!pendingIllustrationFiles.length){toast('Choisis des fichiers PNG ou JPEG');return}
-  const rows=$('#illustrationImportRows');rows.innerHTML=pendingIllustrationFiles.map((file,i)=>{const defaultName=String(file.name||`Illustration ${i+1}`).replace(/\.(png|jpe?g)$/i,''),previewUrl=URL.createObjectURL(file);pendingIllustrationPreviewUrls.push(previewUrl);return `<div class="illustration-import-row"><div class="illustration-import-preview"><img src="${previewUrl}" alt="Aperçu de ${esc(file.name||defaultName)}"></div><div class="illustration-import-file"><strong>${esc(file.name)}</strong><small>${humanFileSize(file.size)} · ${illustrationFileType(file)==='image/png'?'PNG':'JPEG'}</small></div><input class="illustration-import-name" data-illustration-import-name="${i}" value="${esc(defaultName)}" maxlength="120" aria-label="Nom de ${esc(file.name)}" placeholder="Nom de l’illustration"><select data-illustration-import-category="${i}" aria-label="Catégorie de ${esc(file.name)}">${illustrationCategoryOptions('misc')}</select></div>`}).join('');
+  const fallbackCategory=illustrationFallbackCategory();
+  const rows=$('#illustrationImportRows');rows.innerHTML=pendingIllustrationFiles.map((file,i)=>{const defaultName=String(file.name||`Illustration ${i+1}`).replace(/\.(png|jpe?g)$/i,''),previewUrl=URL.createObjectURL(file);pendingIllustrationPreviewUrls.push(previewUrl);return `<div class="illustration-import-row"><div class="illustration-import-preview"><img src="${previewUrl}" alt="Aperçu de ${esc(file.name||defaultName)}"></div><div class="illustration-import-file"><strong>${esc(file.name)}</strong><small>${humanFileSize(file.size)} · ${illustrationFileType(file)==='image/png'?'PNG':'JPEG'}</small></div><input class="illustration-import-name" data-illustration-import-name="${i}" value="${esc(defaultName)}" maxlength="120" aria-label="Nom de ${esc(file.name)}" placeholder="Nom de l’illustration"><select data-illustration-import-category="${i}" aria-label="Catégorie de ${esc(file.name)}">${illustrationCategoryOptions(fallbackCategory)}</select></div>`}).join('');
   $('#illustrationImportDialog').showModal();
 }
 async function savePendingIllustrations(){
-  const files=pendingIllustrationFiles;if(!files.length)return;
-  const records=files.map((file,i)=>{const select=$(`[data-illustration-import-category="${i}"]`),nameInput=$(`[data-illustration-import-name="${i}"]`),category=select?.value||'misc',type=illustrationFileType(file),fallback=String(file.name||`Illustration ${i+1}`).replace(/\.(png|jpe?g)$/i,''),name=String(nameInput?.value||'').trim()||fallback;return {id:uid('img'),name,category,type,size:file.size||0,blob:file.slice(0,file.size,type),createdAt:nowStamp(),sentAt:null}});
-  await putIllustrations(records);pendingIllustrationFiles=[];$('#illustrationImportDialog').close();illustrationSelectedIds=new Set();illustrationMoveMode=false;await renderIllustrations();toast(`${records.length} illustration${records.length>1?'s':''} importée${records.length>1?'s':''}`);
+  const files=pendingIllustrationFiles;if(!files.length)return;const fallbackCategory=illustrationFallbackCategory();
+  const records=files.map((file,i)=>{const select=$(`[data-illustration-import-category="${i}"]`),nameInput=$(`[data-illustration-import-name="${i}"]`),category=illustrationCategoryExists(select?.value)?select.value:fallbackCategory,type=illustrationFileType(file),fallback=String(file.name||`Illustration ${i+1}`).replace(/\.(png|jpe?g)$/i,''),name=String(nameInput?.value||'').trim()||fallback;return {id:uid('img'),name,category,type,size:file.size||0,blob:file.slice(0,file.size,type),createdAt:nowStamp(),sentAt:null}});
+  await putIllustrations(records);const nextOrders=normalizeIllustrationOrders(illustrationOrders,illustrationRecords);illustrationCategories.forEach(([category])=>{const incoming=records.filter(item=>item.category===category).map(item=>item.id);if(incoming.length)nextOrders[category]=[...incoming,...(nextOrders[category]||[]).filter(id=>!incoming.includes(id))]});illustrationOrders=nextOrders;await putIllustrationOrders();pendingIllustrationFiles=[];$('#illustrationImportDialog').close();illustrationSelectedIds=new Set();illustrationMoveMode=false;await renderIllustrations();toast(`${records.length} illustration${records.length>1?'s':''} importée${records.length>1?'s':''}`);
 }
 let editingIllustrationId=null;
 function openIllustrationRenameDialog(id){const item=illustrationRecords.find(x=>x.id===id);if(!item)return;editingIllustrationId=id;const f=$('#illustrationRenameForm');f.elements.name.value=item.name||'Illustration';$('#illustrationRenameDialog').showModal();setTimeout(()=>f.elements.name.focus(),40)}
@@ -729,7 +779,7 @@ function openIllustrationDeleteDialog(){
 }
 async function confirmDeleteSelectedIllustrations(){
   const ids=[...illustrationSelectedIds];if(!ids.length){$('#illustrationDeleteDialog').close();return}
-  try{await deleteIllustrations(ids);illustrationSelectedIds.clear();illustrationMoveMode=false;$('#illustrationDeleteDialog').close();await renderIllustrations();toast(`${ids.length} illustration${ids.length>1?'s':''} supprimée${ids.length>1?'s':''}`)}catch(err){console.error('Suppression illustrations',err);toast('Impossible de supprimer la sélection')}
+  try{await deleteIllustrations(ids);Object.keys(illustrationOrders).forEach(category=>illustrationOrders[category]=(illustrationOrders[category]||[]).filter(id=>!ids.includes(id)));await putIllustrationOrders();illustrationSelectedIds.clear();illustrationMoveMode=false;$('#illustrationDeleteDialog').close();await renderIllustrations();toast(`${ids.length} illustration${ids.length>1?'s':''} supprimée${ids.length>1?'s':''}`)}catch(err){console.error('Suppression illustrations',err);toast('Impossible de supprimer la sélection')}
 }
 async function exportSelectedIllustrations(){
   const selected=illustrationRecords.filter(x=>illustrationSelectedIds.has(x.id));if(!selected.length)return toast('Sélectionne au moins une illustration');
@@ -775,10 +825,10 @@ $$('.library-tab').forEach(b=>b.onclick=()=>{state.libraryTab=b.dataset.library;
 $('#npcImportFile').onchange=async e=>{const file=e.target.files[0];if(!file)return;try{await importNpcFile(file)}catch(err){console.error(err);toast('Fichier PNJ incompatible')}e.target.value=''};
 $('#locationImportFile').onchange=async e=>{const file=e.target.files[0];if(!file)return;try{await importLocationFile(file)}catch(err){console.error(err);toast('Fichier lieu incompatible')}e.target.value=''};
 $('#importFile').onchange=async e=>{const file=e.target.files[0];if(!file)return;try{await importSessionFile(file)}catch(err){console.error(err);toast('Sauvegarde incompatible')}e.target.value=''};$('#btnImportSavedSession').onclick=()=>$('#savedSessionImportFile').click();$('#savedSessionImportFile').onchange=async e=>{const file=e.target.files[0];if(!file)return;try{await importSavedSessionFile(file)}catch(err){console.error(err);toast('Sauvegarde incompatible')}e.target.value=''};$('#btnClear').onclick=()=>{if(confirm('Créer une préparation vide ?')){snapshot();state=EMPTY();persist();render();toast('Nouvelle préparation créée')}};
-$('#btnDeleteIllustrations').onclick=openIllustrationDeleteDialog;$('#btnAddIllustrationCategory').onclick=openIllustrationCategoryDialog;$('#btnMoveIllustrations').onclick=toggleIllustrationMoveMode;$('#btnImportIllustrations').onclick=openIllustrationImporter;$('#btnExportIllustrations').onclick=exportSelectedIllustrations;$('#btnCancelDeleteIllustrations').onclick=()=>$('#illustrationDeleteDialog').close();$('#btnConfirmDeleteIllustrations').onclick=confirmDeleteSelectedIllustrations;$('#illustrationImportFile').onchange=e=>{prepareIllustrationImport(e.target.files);e.target.value=''};$('#illustrationImportForm').onsubmit=async e=>{e.preventDefault();try{await savePendingIllustrations()}catch(err){console.error(err);toast('Impossible d’importer ces illustrations')}};$('#illustrationImportDialog').addEventListener('close',()=>{pendingIllustrationFiles=[];cleanupPendingIllustrationPreviewUrls()});$('#illustrationCategoryForm').onsubmit=async e=>{e.preventDefault();await createIllustrationCategory(new FormData(e.target).get('name'))};$('#illustrationRenameForm').onsubmit=async e=>{e.preventDefault();if(!editingIllustrationId)return;await renameIllustration(editingIllustrationId,new FormData(e.target).get('name'))};$('#illustrationRenameDialog').addEventListener('close',()=>{editingIllustrationId=null});
+$('#btnDeleteIllustrations').onclick=openIllustrationDeleteDialog;$('#btnAddIllustrationCategory').onclick=()=>openIllustrationCategoryDialog();$('#btnMoveIllustrations').onclick=toggleIllustrationMoveMode;$('#btnImportIllustrations').onclick=openIllustrationImporter;$('#btnExportIllustrations').onclick=exportSelectedIllustrations;$('#btnCancelDeleteIllustrations').onclick=()=>$('#illustrationDeleteDialog').close();$('#btnConfirmDeleteIllustrations').onclick=confirmDeleteSelectedIllustrations;$('#illustrationImportFile').onchange=e=>{prepareIllustrationImport(e.target.files);e.target.value=''};$('#illustrationImportForm').onsubmit=async e=>{e.preventDefault();try{await savePendingIllustrations()}catch(err){console.error(err);toast('Impossible d’importer ces illustrations')}};$('#illustrationImportDialog').addEventListener('close',()=>{pendingIllustrationFiles=[];cleanupPendingIllustrationPreviewUrls()});$('#illustrationCategoryForm').onsubmit=async e=>{e.preventDefault();const f=new FormData(e.target);await saveIllustrationCategory(f.get('name'),f.get('color'))};$('#btnDeleteIllustrationCategory').onclick=()=>{if(editingIllustrationCategoryId)deleteIllustrationCategory(editingIllustrationCategoryId)};$('#illustrationCategoryDialog').addEventListener('close',()=>{editingIllustrationCategoryId=null});$('#illustrationRenameForm').onsubmit=async e=>{e.preventDefault();if(!editingIllustrationId)return;await renameIllustration(editingIllustrationId,new FormData(e.target).get('name'))};$('#illustrationRenameDialog').addEventListener('close',()=>{editingIllustrationId=null});
 
 ensureDemoSavedSession();
-if('serviceWorker' in navigator)window.addEventListener('load',async()=>{try{const reg=await navigator.serviceWorker.register('service-worker.js?v=2.0.10',{updateViaCache:'none'});await reg.update()}catch(e){console.warn('Service worker',e)}});
+if('serviceWorker' in navigator)window.addEventListener('load',async()=>{try{const reg=await navigator.serviceWorker.register('service-worker.js?v=2.0.12',{updateViaCache:'none'});await reg.update()}catch(e){console.warn('Service worker',e)}});
 render();
 
 

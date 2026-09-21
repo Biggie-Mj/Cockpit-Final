@@ -11,7 +11,7 @@
   <link rel="manifest" href="manifest.webmanifest?v=2.0.10">
   <link rel="apple-touch-icon" href="apple-touch-icon.png?v=2.0.2">
   <link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png?v=2.0.2">
-  <link rel="stylesheet" href="styles.css?v=2.0.10">
+  <link rel="stylesheet" href="styles.css?v=2.0.12">
 </head>
 <body>
 
@@ -182,9 +182,10 @@
   </dialog>
 
   <dialog id="illustrationCategoryDialog" class="modal compact-modal"><form id="illustrationCategoryForm">
-    <div class="modal-head"><div><span class="eyebrow">ILLUSTRATIONS</span><h2>Nouvelle catégorie</h2><p class="dialog-hint">La catégorie sera ajoutée sous les catégories existantes.</p></div><button type="button" class="icon-btn" data-close="illustrationCategoryDialog"><img src="fermer.png" class="ui-icon close-ui-icon" alt=""></button></div>
+    <div class="modal-head"><div><span class="eyebrow">ILLUSTRATIONS</span><h2 id="illustrationCategoryDialogTitle">Nouvelle catégorie</h2><p id="illustrationCategoryDialogHint" class="dialog-hint">La catégorie sera ajoutée sous les catégories existantes.</p></div><button type="button" class="icon-btn" data-close="illustrationCategoryDialog"><img src="fermer.png" class="ui-icon close-ui-icon" alt=""></button></div>
     <label class="solo-label">Nom de la catégorie<input name="name" required maxlength="40" autocomplete="off" placeholder="Ex. Alliés, Cartes, Artefacts…"></label>
-    <div class="modal-actions illustration-category-actions"><span></span><span></span><button type="button" class="ghost" data-close="illustrationCategoryDialog">Annuler</button><button type="submit" class="illustration-category-btn">Créer</button></div>
+    <label class="illustration-category-color-label"><span>Couleur du tiroir</span><span class="illustration-category-color-control"><input name="color" type="color" value="#6f7d8c" aria-label="Couleur de la catégorie"><small>Surbrillance légère du tiroir</small></span></label>
+    <div class="modal-actions illustration-category-actions"><button type="button" id="btnDeleteIllustrationCategory" class="danger hidden">Supprimer</button><span></span><button type="button" class="ghost" data-close="illustrationCategoryDialog">Annuler</button><button type="submit" id="btnSaveIllustrationCategory" class="illustration-category-btn">Créer</button></div>
   </form></dialog>
 
 
@@ -213,6 +214,6 @@
   <input id="locationImportFile" type="file" accept=".json,application/json" hidden>
   <input id="illustrationImportFile" type="file" accept="image/png,image/jpeg,.png,.jpg,.jpeg" multiple hidden>
   <dialog id="ambienceDrawer" aria-labelledby="ambienceDrawerTitle"><div class="modal-head"><h2 id="ambienceDrawerTitle">Ambiances</h2><button type="button" class="icon-btn" data-close="ambienceDrawer" aria-label="Fermer les ambiances"><img src="fermer.png" class="ui-icon" alt=""></button></div><div id="ambienceDrawerList"></div><div class="modal-actions"><button id="btnManageAmbiences" class="ghost">Gérer les ambiances</button></div></dialog>
-  <script src="app.js?v=2.0.10"></script>
+  <script src="app.js?v=2.0.12"></script>
 </body>
 </html>
