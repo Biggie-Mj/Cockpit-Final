@@ -684,10 +684,15 @@ async function moveSelectedIllustrations(category){
   if(!illustrationCategories.some(([value])=>value===category))return;
   const selected=illustrationRecords.filter(item=>illustrationSelectedIds.has(item.id));
   if(!selected.length){illustrationMoveMode=false;renderIllustrationSelectionMeta();return}
-  selected.forEach(item=>item.category=category);
   try{
-    await putIllustrations(selected);
-    const count=selected.length,label=illustrationCategoryLabel(category);
+    const moved=await Promise.all(selected.map(async item=>{
+      const type=item.type||item.blob?.type||'image/jpeg';
+      const buffer=await item.blob.arrayBuffer();
+      const blob=new Blob([buffer],{type});
+      return {...item,category,type,size:blob.size,blob};
+    }));
+    await putIllustrations(moved);
+    const count=moved.length,label=illustrationCategoryLabel(category);
     illustrationSelectedIds.clear();illustrationMoveMode=false;
     await renderIllustrations();
     toast(`${count} illustration${count>1?'s':''} déplacée${count>1?'s':''} vers ${label}`);
