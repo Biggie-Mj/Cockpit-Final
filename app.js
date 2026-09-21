@@ -243,7 +243,7 @@ function switchView(view,persistView=true){
 
 function renderPlayers(){
   const el=$('#playerRibbon');
-  document.documentElement.style.setProperty('--players-h','48px');
+  document.documentElement.style.setProperty('--players-h','60px');
   const indexed=state.players.map((p,i)=>({p,i})).sort((a,b)=>(b.p.spotlightCount||0)-(a.p.spotlightCount||0)||a.i-b.i);
   const counts=indexed.map(x=>x.p.spotlightCount||0),max=counts.length?Math.max(...counts):0;
   const chips=indexed.map(({p})=>{

@@ -307,3 +307,48 @@ button,.location-tile,.rail-location,.ammo-line,.prep-secret,.context-card,.libr
 button.rhythm-row{width:100%;text-align:left;min-height:44px;font-weight:inherit;cursor:pointer;white-space:normal}
 button.rhythm-row:focus-visible{outline:2px solid #d7ae6c;outline-offset:2px}
 button.rhythm-row:active{filter:brightness(1.18)}
+
+/* Lisibilité : conserver les paragraphes et dimensionner les cadres au contenu. */
+.live-core p,.live-core li,.context-grid p,.live-hero .concept,
+.strong-copy,.strong-play-text,.thread-goal,.thread-step span,
+.table-thread-goal,.table-thread-step span,.context-card strong,.context-card small,
+.library-card h3,.library-card p,.library-card .subtitle,.npc-facts p,.sheet-head p,
+.injection-chip b,.injection-chip small,.rhythm-row>span:last-child,
+.pin-item>span,.ammo-line>span,.journal-entry p,.note-history-row strong,
+.search-result strong,.search-result small,.inject-row strong,.inject-row small,
+.location-tile strong,.rail-location strong,.prep-secret strong{
+  white-space:pre-wrap;overflow-wrap:anywhere;word-break:normal;
+}
+.location-tile small,.rail-location small,.prep-secret span,.table-strong-start strong{
+  white-space:pre-wrap!important;
+}
+.live-core,.context-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+.live-core article,.context-grid>div,.context-card,.library-card,.prep-secret,
+.rail-location,.location-tile,.injection-chip,.rhythm-row,.pin-item,.npc-facts section{
+  height:auto;max-height:none;min-width:0;overflow-wrap:anywhere;
+}
+/* Les fractions incluent l'espace restant après les gouttières. */
+.table-shell{grid-template-columns:minmax(0,21fr) minmax(0,54fr) minmax(0,25fr);grid-template-rows:minmax(0,1fr)}
+.left-rail{overflow:auto}
+.left-rail>*,.right-rail>.context-tabs{flex-shrink:0}
+.table-location-list{flex:0 0 auto!important;min-height:0!important;overflow:visible!important;grid-auto-rows:max-content;align-content:start}
+.table-thread{flex:0 0 auto;min-height:0;max-height:none;overflow:visible}
+.context-content{min-height:0;grid-auto-rows:max-content}
+.context-card.secret{grid-template-columns:minmax(0,1fr)}
+.context-card.secret .reveal-btn{justify-self:start}
+.reveal-methods{grid-template-columns:repeat(auto-fit,minmax(42px,1fr))}
+.secret-method-badge{max-width:100%;white-space:normal;overflow-wrap:anywhere}
+.live-hero{flex-wrap:wrap}.live-hero>div:first-child{flex:1 1 240px}
+.live-actions{flex:0 1 auto}
+.library-panel,.journal-panel{display:flex;flex-direction:column}
+.library-panel>*,.journal-panel>*{flex-shrink:0}
+.library-content,.journal-content{flex:1 1 auto;height:auto;min-height:0}
+.library-card header,.library-card footer,.panel-head,.component-toolbar{flex-wrap:wrap}
+@media(max-width:1050px){
+  .table-shell{grid-template-columns:minmax(0,22fr) minmax(0,52fr) minmax(0,26fr)}
+  .table-thread{max-height:none}
+}
+/* Spotlight : symbole de 38 px et bandeau assez haut pour ses boutons. */
+.player-ribbon{height:60px!important}
+.player-chip{grid-template-rows:minmax(0,1fr)}
+.player-chip .spotlight-ui-icon{width:38px;height:38px}
